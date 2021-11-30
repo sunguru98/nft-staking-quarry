@@ -180,7 +180,7 @@ pub mod quarry_mine {
         quarry.annual_rewards_rate = 0;
         quarry.rewards_share = 0;
         quarry.nft_update_authority = *ctx.accounts.nft_update_authority.to_account_info().key;
-
+        quarry.candy_machine_id = candy_machine_id;
         let current_ts = Clock::get()?.unix_timestamp;
         emit!(QuarryCreateEvent {
             nft_update_authority: quarry.nft_update_authority,
@@ -907,7 +907,7 @@ pub struct ClaimEvent {
     pub authority: Pubkey,
     /// Token of the pool staked into.
     #[index]
-    pub staked_token: Pubkey,
+    pub nft_update_authority: Pubkey,
     /// Token received as rewards.
     pub rewards_token: Pubkey,
     /// Amount of rewards token received.

@@ -221,20 +221,27 @@ impl<'info> Validate<'info> for UserStake<'info> {
         assert_keys_eq!(self.miner.quarry_key, self.quarry.key(), "quarry");
 
         // miner_vault
-        assert_keys_eq!(self.miner.token_vault_key, self.miner_vault, "miner vault");
         assert_keys_eq!(
-            self.miner_vault.mint,
-            self.quarry.token_mint_key,
-            "vault mint"
+            self.miner.nft_token_vault_key,
+            self.miner_vault,
+            "miner vault"
         );
+        // assert_keys_eq!(
+        //     self.miner_vault.mint,
+        //     self.quarry.token_mint_key,
+        //     "vault mint"
+        // );
+
+        // AccountMeta
+
         assert_keys_eq!(self.miner_vault.owner, self.miner, "vault owner");
 
         // token_account
-        assert_keys_eq!(
-            self.token_account.mint,
-            self.quarry.token_mint_key,
-            "token mint"
-        );
+        // assert_keys_eq!(
+        //     self.token_account.mint,
+        //     self.quarry.token_mint_key,
+        //     "token mint"
+        // );
 
         // rewarder
         assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");

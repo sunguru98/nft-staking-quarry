@@ -131,9 +131,18 @@ impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
 impl<'info> Validate<'info> for CreateMiner<'info> {
     fn validate(&self) -> ProgramResult {
         require!(!self.rewarder.is_paused, Paused);
-        assert_ata!(self.miner_vault, self.miner, self.token_mint, "miner vault");
-        assert_keys_eq!(self.miner_vault.owner, self.miner, "miner vault owner");
-        assert_keys_eq!(self.miner_vault.mint, self.token_mint, "miner vault mint");
+        assert_ata!(
+            self.miner_nft_vault,
+            self.miner,
+            self.token_mint,
+            "miner vault"
+        );
+        assert_keys_eq!(self.miner_nft_vault.owner, self.miner, "miner vault owner");
+        assert_keys_eq!(
+            self.miner_nft_vault.mint,
+            self.token_mint,
+            "miner vault mint"
+        );
         assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         Ok(())
@@ -220,20 +229,30 @@ impl<'info> Validate<'info> for UserStake<'info> {
         // quarry
         assert_keys_eq!(self.miner.quarry_key, self.quarry.key(), "quarry");
 
-        // miner_vault
-        assert_keys_eq!(self.miner.token_vault_key, self.miner_vault, "miner vault");
+        // nft_token_vault_key
         assert_keys_eq!(
-            self.miner_vault.mint,
-            self.quarry.token_mint_key,
-            "vault mint"
+            self.miner.nft_token_vault_key,
+            self.nft_token_vault_key,
+            "minter nft token vault"
         );
-        assert_keys_eq!(self.miner_vault.owner, self.miner, "vault owner");
 
-        // token_account
         assert_keys_eq!(
-            self.token_account.mint,
-            self.quarry.token_mint_key,
-            "token mint"
+            self.nft_token_vault_key.owner,
+            self.miner,
+            "nft vault owner"
+        );
+
+        // nft metadata
+        assert_keys_eq!(
+            self.nft_metadata,
+            self.miner.nft_metadata,
+            "miner nft metadata",
+        );
+
+        assert_keys_eq!(
+            self.nft_metadata.update_authority,
+            self.quarry.nft_update_authority,
+            "nft update authority"
         );
 
         // rewarder

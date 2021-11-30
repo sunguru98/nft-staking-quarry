@@ -107,7 +107,11 @@ pub mod quarry_operator {
 
     /// Calls [quarry_mine::quarry_mine::create_quarry].
     #[access_control(ctx.accounts.validate())]
-    pub fn delegate_create_quarry(ctx: Context<DelegateCreateQuarry>, bump: u8) -> ProgramResult {
+    pub fn delegate_create_quarry(
+        ctx: Context<DelegateCreateQuarry>,
+        bump: u8,
+        candy_machine_id: Option<Pubkey>,
+    ) -> ProgramResult {
         let operator = &ctx.accounts.with_delegate.operator;
         let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
         quarry_mine::cpi::create_quarry(
@@ -118,8 +122,8 @@ pub mod quarry_operator {
                     .to_account_info(),
                 quarry_mine::cpi::accounts::CreateQuarry {
                     quarry: ctx.accounts.quarry.to_account_info(),
+                    nft_update_authority: ctx.accounts.nft_update_authority.to_account_info(),
                     auth: ctx.accounts.with_delegate.to_auth_accounts(),
-                    token_mint: ctx.accounts.token_mint.to_account_info(),
                     payer: ctx.accounts.payer.to_account_info(),
                     unused_clock: ctx.accounts.unused_clock.to_account_info(),
                     system_program: ctx.accounts.system_program.to_account_info(),
@@ -127,6 +131,7 @@ pub mod quarry_operator {
                 signer_seeds,
             ),
             bump,
+            candy_machine_id,
         )?;
         Ok(())
     }
@@ -257,6 +262,7 @@ pub struct DelegateCreateQuarry<'info> {
     #[account(mut)]
     pub quarry: UncheckedAccount<'info>,
     pub token_mint: Box<Account<'info, anchor_spl::token::Mint>>,
+    pub nft_update_authority: UncheckedAccount<'info>,
 
     /// Payer of [Quarry] creation.
     #[account(mut)]

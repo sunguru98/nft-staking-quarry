@@ -78,7 +78,7 @@ impl<'info> ClaimRewards<'info> {
         let now = Clock::get()?.unix_timestamp;
         emit!(ClaimEvent {
             authority: self.stake.authority.key(),
-            staked_token: self.stake.quarry.token_mint_key,
+            staked_token: self.stake.quarry.nft_update_authority,
             timestamp: now,
             rewards_token: self.rewards_token_mint.key(),
             amount: amount_claimable_minus_fees,

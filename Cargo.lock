@@ -935,6 +935,7 @@ version = "1.10.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
+ "metaplex-token-metadata",
  "num-traits",
  "quarry-mine",
  "quarry-mint-wrapper",

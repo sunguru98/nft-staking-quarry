@@ -17,6 +17,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
 use anchor_spl::token::{self, Mint, TokenAccount, Transfer};
 use metadata::Metadata;
+use metaplex_token_metadata::ID as MetadataProgramID;
 use payroll::Payroll;
 use std::cmp;
 use vipers::assert_keys_eq;
@@ -181,6 +182,10 @@ pub mod quarry_mine {
         quarry.rewards_share = 0;
         quarry.nft_update_authority = *ctx.accounts.nft_update_authority.to_account_info().key;
 
+        if candy_machine_id.is_some() {
+            quarry.candy_machine_id = candy_machine_id;
+        }
+
         let current_ts = Clock::get()?.unix_timestamp;
         emit!(QuarryCreateEvent {
             nft_update_authority: quarry.nft_update_authority,
@@ -252,7 +257,7 @@ pub mod quarry_mine {
     ///
     /// Anyone can call this; this is an associated account.
     #[access_control(ctx.accounts.validate())]
-    pub fn create_miner(ctx: Context<CreateMiner>, bump: u8) -> ProgramResult {
+    pub fn create_miner(ctx: Context<CreateMiner>, bump: u8, _metadata_bump: u8) -> ProgramResult {
         let quarry = &mut ctx.accounts.quarry;
         let index = quarry.num_miners;
         quarry.num_miners = unwrap_int!(quarry.num_miners.checked_add(1));
@@ -261,7 +266,8 @@ pub mod quarry_mine {
         miner.authority = ctx.accounts.authority.key();
         miner.bump = bump;
         miner.quarry_key = ctx.accounts.quarry.key();
-        miner.nft_token_vault_key = ctx.accounts.miner_vault.key();
+        miner.nft_token_vault_key = ctx.accounts.miner_nft_vault.key();
+        miner.nft_metadata = ctx.accounts.token_metadata.key();
         miner.rewards_earned = 0;
         miner.rewards_per_token_paid = 0;
         miner.balance = 0;
@@ -298,6 +304,11 @@ pub mod quarry_mine {
             return Ok(());
         }
 
+        if amount > 1 {
+            // noop
+            return Ok(());
+        }
+
         let quarry = &mut ctx.accounts.quarry;
         let clock = Clock::get()?;
         quarry.process_stake_action_internal(
@@ -310,12 +321,12 @@ pub mod quarry_mine {
 
         let cpi_accounts = Transfer {
             from: ctx.accounts.token_account.to_account_info(),
-            to: ctx.accounts.miner_vault.to_account_info(),
+            to: ctx.accounts.nft_token_vault_key.to_account_info(),
             authority: ctx.accounts.authority.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
-        // Transfer LP tokens to quarry vault
+        // Transfer NFT to quarry vault
         token::transfer(cpi_context, amount)?;
 
         emit!(StakeEvent {
@@ -324,6 +335,7 @@ pub mod quarry_mine {
             amount,
             token: ctx.accounts.token_account.mint,
         });
+
         Ok(())
     }
 
@@ -334,8 +346,14 @@ pub mod quarry_mine {
             // noop
             return Ok(());
         }
+
+        if amount > 1 {
+            // noop
+            return Ok(());
+        }
+
         require!(
-            amount <= ctx.accounts.miner_vault.amount,
+            amount <= ctx.accounts.nft_token_vault_key.amount,
             InsufficientBalance
         );
 
@@ -358,7 +376,7 @@ pub mod quarry_mine {
         ];
         let signer_seeds = &[&miner_seeds[..]];
         let cpi_accounts = token::Transfer {
-            from: ctx.accounts.miner_vault.to_account_info(),
+            from: ctx.accounts.nft_token_vault_key.to_account_info(),
             to: ctx.accounts.token_account.to_account_info(),
             authority: ctx.accounts.miner.to_account_info(),
         };
@@ -367,7 +385,8 @@ pub mod quarry_mine {
             cpi_accounts,
             signer_seeds,
         );
-        // Transfer out LP tokens from quarry vault
+
+        // Transfer out NFT from quarry vault
         token::transfer(cpi_ctx, amount)?;
 
         emit!(WithdrawEvent {
@@ -469,6 +488,8 @@ pub struct Rewarder {
 pub struct Quarry {
     /// Rewarder who owns this quarry
     pub rewarder_key: Pubkey,
+    /// Decimals on the token [Mint].
+    pub token_mint_decimals: u8,
     /// Candy Machine Update Authority
     pub nft_update_authority: Pubkey,
     /// Candy Machine id
@@ -511,6 +532,9 @@ pub struct Miner {
 
     /// [TokenAccount] to hold the [Miner]'s staked NFT.
     pub nft_token_vault_key: Pubkey,
+
+    /// Metadata of upcoming staked NFT
+    pub nft_metadata: Pubkey,
 
     /// Stores the amount of tokens that the [Miner] may claim.
     /// Whenever the [Miner] claims tokens, this is reset to 0.
@@ -714,7 +738,7 @@ pub struct UpdateQuarryRewards<'info> {
 
 /// Accounts for [quarry_mine::create_miner].
 #[derive(Accounts)]
-#[instruction(bump: u8)]
+#[instruction(bump: u8, metadata_bump: u8)]
 pub struct CreateMiner<'info> {
     /// Authority of the [Miner].
     pub authority: Signer<'info>,
@@ -746,14 +770,22 @@ pub struct CreateMiner<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
 
-    /// [Mint] of the token to create a [Quarry] for.
+    /// [Mint] of the NFT to create a [Quarry] for.
     pub token_mint: Account<'info, Mint>,
 
     /// NFT Token Metadata to create a [Quarry] for
+    #[account(
+        seeds = [
+            b"metadata".as_ref(),
+            MetadataProgramID.as_ref(),
+            token_mint.key().to_bytes().as_ref()
+        ],
+        bump = metadata_bump
+    )]
     pub token_metadata: Account<'info, Metadata>,
 
-    /// [TokenAccount] holding the token [Mint].
-    pub miner_vault: Account<'info, TokenAccount>,
+    /// [TokenAccount] holding the token NFT [Mint].
+    pub miner_nft_vault: Account<'info, TokenAccount>,
 
     /// SPL Token program.
     pub token_program: Program<'info, Token>,
@@ -840,9 +872,12 @@ pub struct UserStake<'info> {
     #[account(mut)]
     pub quarry: Account<'info, Quarry>,
 
-    /// Vault of the miner.
+    /// NFT Vault of the miner.
     #[account(mut)]
-    pub miner_vault: Account<'info, TokenAccount>,
+    pub nft_token_vault_key: Account<'info, TokenAccount>,
+
+    /// NFT Metadata
+    pub nft_metadata: Account<'info, Metadata>,
 
     /// User's staked token account
     #[account(mut)]

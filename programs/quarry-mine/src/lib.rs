@@ -161,11 +161,7 @@ pub mod quarry_mine {
     /// Creates a new [Quarry].
     /// This may only be called by the [Rewarder]::authority.
     #[access_control(ctx.accounts.validate())]
-    pub fn create_quarry(
-        ctx: Context<CreateQuarry>,
-        bump: u8,
-        candy_machine_id: Option<Pubkey>,
-    ) -> ProgramResult {
+    pub fn create_quarry(ctx: Context<CreateQuarry>, bump: u8) -> ProgramResult {
         let rewarder = &mut ctx.accounts.auth.rewarder;
         // Update rewarder's quarry stats
         let index = rewarder.num_quarries;
@@ -179,12 +175,9 @@ pub mod quarry_mine {
         quarry.famine_ts = i64::MAX; // 9_223_372_036_854_775_807
         quarry.rewarder_key = *rewarder.to_account_info().key;
         quarry.annual_rewards_rate = 0;
+        quarry.token_mint_decimals = 0;
         quarry.rewards_share = 0;
         quarry.nft_update_authority = *ctx.accounts.nft_update_authority.to_account_info().key;
-
-        if candy_machine_id.is_some() {
-            quarry.candy_machine_id = candy_machine_id;
-        }
 
         let current_ts = Clock::get()?.unix_timestamp;
         emit!(QuarryCreateEvent {
@@ -304,11 +297,6 @@ pub mod quarry_mine {
             return Ok(());
         }
 
-        if amount > 1 {
-            // noop
-            return Ok(());
-        }
-
         let quarry = &mut ctx.accounts.quarry;
         let clock = Clock::get()?;
         quarry.process_stake_action_internal(
@@ -316,7 +304,7 @@ pub mod quarry_mine {
             clock.unix_timestamp,
             &ctx.accounts.rewarder,
             &mut ctx.accounts.miner,
-            amount,
+            1,
         )?;
 
         let cpi_accounts = Transfer {
@@ -327,7 +315,7 @@ pub mod quarry_mine {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         // Transfer NFT to quarry vault
-        token::transfer(cpi_context, amount)?;
+        token::transfer(cpi_context, 1)?;
 
         emit!(StakeEvent {
             timestamp: clock.unix_timestamp,
@@ -347,11 +335,6 @@ pub mod quarry_mine {
             return Ok(());
         }
 
-        if amount > 1 {
-            // noop
-            return Ok(());
-        }
-
         require!(
             amount <= ctx.accounts.nft_token_vault_key.amount,
             InsufficientBalance
@@ -364,7 +347,7 @@ pub mod quarry_mine {
             clock.unix_timestamp,
             &ctx.accounts.rewarder,
             &mut ctx.accounts.miner,
-            amount,
+            1,
         )?;
 
         // Sign a transfer instruction as the [Miner]
@@ -387,7 +370,7 @@ pub mod quarry_mine {
         );
 
         // Transfer out NFT from quarry vault
-        token::transfer(cpi_ctx, amount)?;
+        token::transfer(cpi_ctx, 1)?;
 
         emit!(WithdrawEvent {
             timestamp: clock.unix_timestamp,
@@ -492,8 +475,6 @@ pub struct Quarry {
     pub token_mint_decimals: u8,
     /// Candy Machine Update Authority
     pub nft_update_authority: Pubkey,
-    /// Candy Machine id
-    pub candy_machine_id: Option<Pubkey>,
     /// Bump.
     pub bump: u8,
 
@@ -637,17 +618,6 @@ pub struct AcceptAuthority<'info> {
     pub rewarder: Account<'info, Rewarder>,
 }
 
-/// Mutable [Rewarder] that requires the authority to be a signer.
-#[derive(Accounts)]
-pub struct MutableRewarderWithAuthority<'info> {
-    /// Authority of the rewarder.
-    pub authority: Signer<'info>,
-
-    /// Rewarder of the farm.
-    #[account(mut)]
-    pub rewarder: Account<'info, Rewarder>,
-}
-
 /// Read-only [Rewarder] that requires the authority to be a signer.
 #[derive(Accounts)]
 pub struct ReadOnlyRewarderWithAuthority<'info> {
@@ -663,6 +633,17 @@ pub struct ReadOnlyRewarderWithAuthority<'info> {
 pub struct SetAnnualRewards<'info> {
     /// [Rewarder],
     pub auth: MutableRewarderWithAuthority<'info>,
+}
+
+/// Mutable [Rewarder] that requires the authority to be a signer.
+#[derive(Accounts)]
+pub struct MutableRewarderWithAuthority<'info> {
+    /// Authority of the rewarder.
+    pub authority: Signer<'info>,
+
+    /// Rewarder of the farm.
+    #[account(mut)]
+    pub rewarder: Account<'info, Rewarder>,
 }
 
 /* Quarry contexts */
@@ -782,7 +763,7 @@ pub struct CreateMiner<'info> {
         ],
         bump = metadata_bump
     )]
-    pub token_metadata: Account<'info, Metadata>,
+    pub token_metadata: Box<Account<'info, Metadata>>,
 
     /// [TokenAccount] holding the token NFT [Mint].
     pub miner_nft_vault: Account<'info, TokenAccount>,
@@ -874,7 +855,7 @@ pub struct UserStake<'info> {
 
     /// NFT Vault of the miner.
     #[account(mut)]
-    pub nft_token_vault_key: Account<'info, TokenAccount>,
+    pub nft_token_vault_key: Box<Account<'info, TokenAccount>>,
 
     /// NFT Metadata
     pub nft_metadata: Account<'info, Metadata>,

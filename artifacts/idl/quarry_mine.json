@@ -203,7 +203,7 @@
           ]
         },
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "isMut": false,
           "isSigner": false
         },
@@ -227,6 +227,12 @@
         {
           "name": "bump",
           "type": "u8"
+        },
+        {
+          "name": "candyMachineId",
+          "type": {
+            "option": "publicKey"
+          }
         }
       ]
     },
@@ -347,7 +353,12 @@
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "tokenMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "minerNftVault",
           "isMut": false,
           "isSigner": false
         },
@@ -360,6 +371,10 @@
       "args": [
         {
           "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "metadataBump",
           "type": "u8"
         }
       ]
@@ -459,8 +474,13 @@
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "nftTokenVaultKey",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -505,8 +525,13 @@
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "nftTokenVaultKey",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -630,8 +655,18 @@
             "type": "publicKey"
           },
           {
-            "name": "tokenMintKey",
+            "name": "tokenMintDecimals",
+            "type": "u8"
+          },
+          {
+            "name": "nftUpdateAuthority",
             "type": "publicKey"
+          },
+          {
+            "name": "candyMachineId",
+            "type": {
+              "option": "publicKey"
+            }
           },
           {
             "name": "bump",
@@ -640,10 +675,6 @@
           {
             "name": "index",
             "type": "u16"
-          },
-          {
-            "name": "tokenMintDecimals",
-            "type": "u8"
           },
           {
             "name": "famineTs",
@@ -694,7 +725,11 @@
             "type": "u8"
           },
           {
-            "name": "tokenVaultKey",
+            "name": "nftTokenVaultKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "nftMetadata",
             "type": "publicKey"
           },
           {
@@ -878,7 +913,7 @@
       "name": "QuarryCreateEvent",
       "fields": [
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "type": "publicKey",
           "index": false
         },
@@ -893,7 +928,7 @@
       "name": "QuarryRewardsUpdateEvent",
       "fields": [
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "type": "publicKey",
           "index": false
         },

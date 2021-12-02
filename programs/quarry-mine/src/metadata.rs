@@ -1,3 +1,4 @@
+use anchor_lang::prelude::msg;
 use anchor_lang::solana_program::program_error::ProgramError;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::AnchorDeserialize;
@@ -19,6 +20,7 @@ impl anchor_lang::AccountDeserialize for Metadata {
     }
 
     fn try_deserialize_unchecked(buf: &mut &[u8]) -> Result<Self, ProgramError> {
+        msg!("DESERIALZING");
         match metaplex_token_metadata::state::Metadata::deserialize(buf) {
             Ok(data) => Ok(Metadata { 0: data }),
             Err(_) => Err(ProgramError::InvalidAccountData),

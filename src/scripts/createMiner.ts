@@ -1,17 +1,8 @@
 import fs from "fs-extra";
-import {
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js";
+import { Keypair, SystemProgram, Transaction } from "@solana/web3.js";
 import { QuarryMineJSON } from "./../idls/quarry_mine";
 import * as anchor from "@project-serum/anchor";
-import {
-  getAnchorProgram,
-  METADATA_PROGRAM_ID,
-  MINER_SECRET_KEY,
-} from "../constants";
+import { getAnchorProgram, MINER_SECRET_KEY } from "../constants";
 import { getMinerPDA } from "../pda";
 import { getAllNFTsOwned } from "../utils";
 import {
@@ -106,7 +97,11 @@ const {
     await SOLANA_CONNECTION.sendRawTransaction(signedTransaction.serialize());
     await fs.writeJSON(
       `${__dirname}/../pubkeys/minerPDA.json`,
-      quarryPDA.toString()
+      minerPDA.toString()
+    );
+    await fs.writeJSON(
+      `${__dirname}/../pubkeys/minerPDAAssocToken.json`,
+      minerVaultAssocAddress.toString()
     );
   } else {
     console.log("User doesn't have any NFTs. Please mint some :)");

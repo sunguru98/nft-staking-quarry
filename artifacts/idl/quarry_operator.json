@@ -231,12 +231,6 @@
         {
           "name": "bump",
           "type": "u8"
-        },
-        {
-          "name": "candyMachineId",
-          "type": {
-            "option": "publicKey"
-          }
         }
       ]
     },

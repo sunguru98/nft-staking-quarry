@@ -291,10 +291,15 @@ pub mod quarry_mine {
 
     /// Stakes tokens into the [Miner].
     #[access_control(ctx.accounts.validate())]
-    pub fn stake_tokens(ctx: Context<UserStake>, amount: u64) -> ProgramResult {
+    pub fn stake_nft(ctx: Context<UserStake>, amount: u8) -> ProgramResult {
         if amount == 0 {
             // noop
             return Ok(());
+        }
+
+        if amount > 1 {
+            // Error
+            return Err(ProgramError::InvalidAccountData);
         }
 
         let quarry = &mut ctx.accounts.quarry;
@@ -329,14 +334,14 @@ pub mod quarry_mine {
 
     /// Withdraws tokens from the [Miner].
     #[access_control(ctx.accounts.validate())]
-    pub fn withdraw_tokens(ctx: Context<UserStake>, amount: u64) -> ProgramResult {
+    pub fn withdraw_nft(ctx: Context<UserStake>, amount: u8) -> ProgramResult {
         if amount == 0 {
             // noop
             return Ok(());
         }
 
         require!(
-            amount <= ctx.accounts.nft_token_vault_key.amount,
+            amount == ctx.accounts.nft_token_vault_key.amount as u8,
             InsufficientBalance
         );
 
@@ -939,7 +944,7 @@ pub struct StakeEvent {
     #[index]
     pub token: Pubkey,
     /// Amount staked.
-    pub amount: u64,
+    pub amount: u8,
     /// When the event took place.
     pub timestamp: i64,
 }
@@ -954,7 +959,7 @@ pub struct WithdrawEvent {
     #[index]
     pub token: Pubkey,
     /// Amount withdrawn.
-    pub amount: u64,
+    pub amount: u8,
     /// When the event took place.
     pub timestamp: i64,
 }

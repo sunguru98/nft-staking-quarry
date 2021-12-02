@@ -232,12 +232,6 @@ export type QuarryOperatorIDL =
         {
           "name": "bump",
           "type": "u8"
-        },
-        {
-          "name": "candyMachineId",
-          "type": {
-            "option": "publicKey"
-          }
         }
       ]
     },
@@ -572,12 +566,6 @@ export const QuarryOperatorJSON: QuarryOperatorIDL =
         {
           "name": "bump",
           "type": "u8"
-        },
-        {
-          "name": "candyMachineId",
-          "type": {
-            "option": "publicKey"
-          }
         }
       ]
     },

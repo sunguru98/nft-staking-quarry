@@ -32,6 +32,7 @@
     "initMintWrapper": "ts-node src/scripts/initMintWrapper.ts",
     "createRewarder": "ts-node src/scripts/createRewarder.ts",
     "createQuarry": "ts-node src/scripts/createQuarry.ts",
-    "createMiner": "ts-node src/scripts/createMiner.ts"
+    "createMiner": "ts-node src/scripts/createMiner.ts",
+    "stake": "ts-node src/scripts/stake.ts"
   }
 }

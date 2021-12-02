@@ -451,7 +451,7 @@ export type QuarryMineIDL =
       "args": []
     },
     {
-      "name": "stakeTokens",
+      "name": "stakeNft",
       "accounts": [
         {
           "name": "authority",
@@ -497,12 +497,12 @@ export type QuarryMineIDL =
       "args": [
         {
           "name": "amount",
-          "type": "u64"
+          "type": "u8"
         }
       ]
     },
     {
-      "name": "withdrawTokens",
+      "name": "withdrawNft",
       "accounts": [
         {
           "name": "authority",
@@ -548,7 +548,7 @@ export type QuarryMineIDL =
       "args": [
         {
           "name": "amount",
-          "type": "u64"
+          "type": "u8"
         }
       ]
     },
@@ -714,6 +714,10 @@ export type QuarryMineIDL =
             "type": "u8"
           },
           {
+            "name": "metadataBump",
+            "type": "u8"
+          },
+          {
             "name": "nftTokenVaultKey",
             "type": "publicKey"
           },
@@ -823,7 +827,7 @@ export type QuarryMineIDL =
         },
         {
           "name": "amount",
-          "type": "u64",
+          "type": "u8",
           "index": false
         },
         {
@@ -848,7 +852,7 @@ export type QuarryMineIDL =
         },
         {
           "name": "amount",
-          "type": "u64",
+          "type": "u8",
           "index": false
         },
         {
@@ -1456,7 +1460,7 @@ export const QuarryMineJSON: QuarryMineIDL =
       "args": []
     },
     {
-      "name": "stakeTokens",
+      "name": "stakeNft",
       "accounts": [
         {
           "name": "authority",
@@ -1502,12 +1506,12 @@ export const QuarryMineJSON: QuarryMineIDL =
       "args": [
         {
           "name": "amount",
-          "type": "u64"
+          "type": "u8"
         }
       ]
     },
     {
-      "name": "withdrawTokens",
+      "name": "withdrawNft",
       "accounts": [
         {
           "name": "authority",
@@ -1553,7 +1557,7 @@ export const QuarryMineJSON: QuarryMineIDL =
       "args": [
         {
           "name": "amount",
-          "type": "u64"
+          "type": "u8"
         }
       ]
     },
@@ -1719,6 +1723,10 @@ export const QuarryMineJSON: QuarryMineIDL =
             "type": "u8"
           },
           {
+            "name": "metadataBump",
+            "type": "u8"
+          },
+          {
             "name": "nftTokenVaultKey",
             "type": "publicKey"
           },
@@ -1828,7 +1836,7 @@ export const QuarryMineJSON: QuarryMineIDL =
         },
         {
           "name": "amount",
-          "type": "u64",
+          "type": "u8",
           "index": false
         },
         {
@@ -1853,7 +1861,7 @@ export const QuarryMineJSON: QuarryMineIDL =
         },
         {
           "name": "amount",
-          "type": "u64",
+          "type": "u8",
           "index": false
         },
         {

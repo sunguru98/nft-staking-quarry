@@ -131,7 +131,6 @@ pub mod quarry_operator {
                 signer_seeds,
             ),
             bump,
-            candy_machine_id,
         )?;
         Ok(())
     }

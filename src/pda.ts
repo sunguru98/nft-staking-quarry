@@ -67,11 +67,20 @@ export async function getMinerPDA(
   minerAuthority: PublicKey,
   programId: PublicKey = new PublicKey(PROGRAM_IDS["mine"])
 ) {
+  const rewarderPDA = await fs.readJSON(
+    `${__dirname}/pubkeys/rewarderPDA.json`,
+    {
+      encoding: "utf-8",
+    }
+  );
+
+  if (!rewarderPDA) throw new Error("Rewarder PDA not found");
+
   const quarryPDA = await fs.readJSON(`${__dirname}/pubkeys/quarryPDA.json`, {
     encoding: "utf-8",
   });
 
-  if (!quarryPDA) throw new Error("Rewarder PDA not found");
+  if (!quarryPDA) throw new Error("Quarry PDA not found");
 
   const [minerPDA, bump] = await PublicKey.findProgramAddress(
     [
@@ -83,6 +92,8 @@ export async function getMinerPDA(
   );
 
   return {
+    rewarderPDA,
+    quarryPDA,
     minerPDA,
     bump,
   };

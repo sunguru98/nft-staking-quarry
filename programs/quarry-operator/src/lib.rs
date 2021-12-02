@@ -107,11 +107,7 @@ pub mod quarry_operator {
 
     /// Calls [quarry_mine::quarry_mine::create_quarry].
     #[access_control(ctx.accounts.validate())]
-    pub fn delegate_create_quarry(
-        ctx: Context<DelegateCreateQuarry>,
-        bump: u8,
-        candy_machine_id: Option<Pubkey>,
-    ) -> ProgramResult {
+    pub fn delegate_create_quarry(ctx: Context<DelegateCreateQuarry>, bump: u8) -> ProgramResult {
         let operator = &ctx.accounts.with_delegate.operator;
         let signer_seeds: &[&[&[u8]]] = &[gen_operator_signer_seeds!(operator)];
         quarry_mine::cpi::create_quarry(

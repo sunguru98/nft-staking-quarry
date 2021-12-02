@@ -17,7 +17,6 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
 use anchor_spl::token::{self, Mint, TokenAccount, Transfer};
 use metadata::Metadata;
-use metaplex_token_metadata::ID as MetadataProgramID;
 use payroll::Payroll;
 use std::cmp;
 use vipers::assert_keys_eq;
@@ -249,8 +248,8 @@ pub mod quarry_mine {
     /// Creates a [Miner] for the given authority.
     ///
     /// Anyone can call this; this is an associated account.
-    #[access_control(ctx.accounts.validate())]
-    pub fn create_miner(ctx: Context<CreateMiner>, bump: u8, _metadata_bump: u8) -> ProgramResult {
+    #[access_control(ctx.accounts.validate(metadata_bump))]
+    pub fn create_miner(ctx: Context<CreateMiner>, bump: u8, metadata_bump: u8) -> ProgramResult {
         let quarry = &mut ctx.accounts.quarry;
         let index = quarry.num_miners;
         quarry.num_miners = unwrap_int!(quarry.num_miners.checked_add(1));
@@ -258,6 +257,7 @@ pub mod quarry_mine {
         let miner = &mut ctx.accounts.miner;
         miner.authority = ctx.accounts.authority.key();
         miner.bump = bump;
+        miner.metadata_bump = metadata_bump;
         miner.quarry_key = ctx.accounts.quarry.key();
         miner.nft_token_vault_key = ctx.accounts.miner_nft_vault.key();
         miner.nft_metadata = ctx.accounts.token_metadata.key();
@@ -511,6 +511,9 @@ pub struct Miner {
     /// Bump.
     pub bump: u8,
 
+    /// Metadata Bump
+    pub metadata_bump: u8,
+
     /// [TokenAccount] to hold the [Miner]'s staked NFT.
     pub nft_token_vault_key: Pubkey,
 
@@ -755,14 +758,6 @@ pub struct CreateMiner<'info> {
     pub token_mint: Account<'info, Mint>,
 
     /// NFT Token Metadata to create a [Quarry] for
-    #[account(
-        seeds = [
-            b"metadata".as_ref(),
-            MetadataProgramID.as_ref(),
-            token_mint.key().to_bytes().as_ref()
-        ],
-        bump = metadata_bump
-    )]
     pub token_metadata: Box<Account<'info, Metadata>>,
 
     /// [TokenAccount] holding the token NFT [Mint].

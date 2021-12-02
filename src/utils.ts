@@ -75,7 +75,7 @@ export async function getAllNFTsOwned(
       mintAccountDecoded.decimals === 0 &&
       SUPPLY_ONE.equals(mintAccountDecoded.supply)
     ) {
-      const [metadataPub] = await PublicKey.findProgramAddress(
+      const [metadataPub, metaBump] = await PublicKey.findProgramAddress(
         [
           Buffer.from("metadata"),
           METADATA_PROGRAM_ID.toBuffer(),
@@ -91,7 +91,7 @@ export async function getAllNFTsOwned(
         metadataPub
       );
 
-      const [masterEditionPDA] = await PublicKey.findProgramAddress(
+      const [masterEditionPDA, masterBump] = await PublicKey.findProgramAddress(
         [
           Buffer.from("metadata"),
           METADATA_PROGRAM_ID.toBuffer(),
@@ -110,8 +110,12 @@ export async function getAllNFTsOwned(
 
       nfts.push({
         mint,
-        metadata: { ...metadata.data, address: metadataPub },
-        masterEdition: { ...masterEdition.data, address: masterEditionPDA },
+        metadata: { ...metadata.data, address: metadataPub, bump: metaBump },
+        masterEdition: {
+          ...masterEdition.data,
+          address: masterEditionPDA,
+          bump: masterBump,
+        },
       });
     }
   }

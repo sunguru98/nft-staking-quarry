@@ -94,7 +94,7 @@ mod tests {
     use crate::{payroll::PRECISION_MULTIPLIER, quarry::StakeAction};
 
     const SECONDS_PER_DAY: u64 = 86_400;
-    const DEFAULT_TOKEN_DECIMALS: u8 = 6;
+    const _DEFAULT_TOKEN_DECIMALS: u8 = 0;
 
     pub struct MinerVault {
         balance: u64,

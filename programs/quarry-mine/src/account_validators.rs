@@ -2,6 +2,7 @@
 
 use anchor_lang::prelude::*;
 use anchor_lang::Key;
+use metaplex_token_metadata::ID as metadataProgramID;
 use vipers::validate::Validate;
 use vipers::{assert_ata, assert_keys_eq};
 
@@ -128,8 +129,31 @@ impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
 /// Miner functions
 /// --------------------------------
 
-impl<'info> Validate<'info> for CreateMiner<'info> {
-    fn validate(&self) -> ProgramResult {
+impl<'info> CreateMiner<'info> {
+    pub fn validate(&self, metadata_bump: u8) -> ProgramResult {
+        msg!(
+            "Received Metadata Pubkey {}",
+            self.token_metadata.key().to_string()
+        );
+
+        let expected_metadata = Pubkey::create_program_address(
+            &[
+                b"metadata",
+                &metadataProgramID.to_bytes(),
+                &self.token_mint.key().to_bytes(),
+                &[metadata_bump],
+            ],
+            &metadataProgramID,
+        )?;
+
+        msg!("Expected Metadata Pubkey {}", expected_metadata.to_string());
+
+        assert_keys_eq!(
+            self.token_metadata.to_account_info().key(),
+            expected_metadata,
+            "miner nft metadata"
+        );
+
         require!(!self.rewarder.is_paused, Paused);
         assert_ata!(
             self.miner_nft_vault,

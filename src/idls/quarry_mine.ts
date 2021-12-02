@@ -204,7 +204,7 @@ export type QuarryMineIDL =
           ]
         },
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "isMut": false,
           "isSigner": false
         },
@@ -348,7 +348,12 @@ export type QuarryMineIDL =
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "tokenMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "minerNftVault",
           "isMut": false,
           "isSigner": false
         },
@@ -361,6 +366,10 @@ export type QuarryMineIDL =
       "args": [
         {
           "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "metadataBump",
           "type": "u8"
         }
       ]
@@ -460,8 +469,13 @@ export type QuarryMineIDL =
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "nftTokenVaultKey",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -506,8 +520,13 @@ export type QuarryMineIDL =
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "nftTokenVaultKey",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -631,7 +650,11 @@ export type QuarryMineIDL =
             "type": "publicKey"
           },
           {
-            "name": "tokenMintKey",
+            "name": "tokenMintDecimals",
+            "type": "u8"
+          },
+          {
+            "name": "nftUpdateAuthority",
             "type": "publicKey"
           },
           {
@@ -641,10 +664,6 @@ export type QuarryMineIDL =
           {
             "name": "index",
             "type": "u16"
-          },
-          {
-            "name": "tokenMintDecimals",
-            "type": "u8"
           },
           {
             "name": "famineTs",
@@ -695,7 +714,11 @@ export type QuarryMineIDL =
             "type": "u8"
           },
           {
-            "name": "tokenVaultKey",
+            "name": "nftTokenVaultKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "nftMetadata",
             "type": "publicKey"
           },
           {
@@ -879,7 +902,7 @@ export type QuarryMineIDL =
       "name": "QuarryCreateEvent",
       "fields": [
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "type": "publicKey",
           "index": false
         },
@@ -894,7 +917,7 @@ export type QuarryMineIDL =
       "name": "QuarryRewardsUpdateEvent",
       "fields": [
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "type": "publicKey",
           "index": false
         },
@@ -1186,7 +1209,7 @@ export const QuarryMineJSON: QuarryMineIDL =
           ]
         },
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "isMut": false,
           "isSigner": false
         },
@@ -1330,7 +1353,12 @@ export const QuarryMineJSON: QuarryMineIDL =
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "tokenMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "minerNftVault",
           "isMut": false,
           "isSigner": false
         },
@@ -1343,6 +1371,10 @@ export const QuarryMineJSON: QuarryMineIDL =
       "args": [
         {
           "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "metadataBump",
           "type": "u8"
         }
       ]
@@ -1442,8 +1474,13 @@ export const QuarryMineJSON: QuarryMineIDL =
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "nftTokenVaultKey",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1488,8 +1525,13 @@ export const QuarryMineJSON: QuarryMineIDL =
           "isSigner": false
         },
         {
-          "name": "minerVault",
+          "name": "nftTokenVaultKey",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftMetadata",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1613,7 +1655,11 @@ export const QuarryMineJSON: QuarryMineIDL =
             "type": "publicKey"
           },
           {
-            "name": "tokenMintKey",
+            "name": "tokenMintDecimals",
+            "type": "u8"
+          },
+          {
+            "name": "nftUpdateAuthority",
             "type": "publicKey"
           },
           {
@@ -1623,10 +1669,6 @@ export const QuarryMineJSON: QuarryMineIDL =
           {
             "name": "index",
             "type": "u16"
-          },
-          {
-            "name": "tokenMintDecimals",
-            "type": "u8"
           },
           {
             "name": "famineTs",
@@ -1677,7 +1719,11 @@ export const QuarryMineJSON: QuarryMineIDL =
             "type": "u8"
           },
           {
-            "name": "tokenVaultKey",
+            "name": "nftTokenVaultKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "nftMetadata",
             "type": "publicKey"
           },
           {
@@ -1861,7 +1907,7 @@ export const QuarryMineJSON: QuarryMineIDL =
       "name": "QuarryCreateEvent",
       "fields": [
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "type": "publicKey",
           "index": false
         },
@@ -1876,7 +1922,7 @@ export const QuarryMineJSON: QuarryMineIDL =
       "name": "QuarryRewardsUpdateEvent",
       "fields": [
         {
-          "name": "tokenMint",
+          "name": "nftUpdateAuthority",
           "type": "publicKey",
           "index": false
         },

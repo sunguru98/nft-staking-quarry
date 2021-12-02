@@ -1,14 +1,18 @@
+import { Metadata } from "@metaplex/js/lib/programs/metadata";
+import { Connection, PublicKey } from "@solana/web3.js";
 import JSBI from "jsbi";
 import Decimal from "decimal.js-light";
-import { u64 } from "@solana/spl-token";
+import { MintLayout, TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
 
 import {
   HONEY_TOKEN_HARD_CAP,
   DEFAULT_TOKEN_DECIMALS,
-  MAX_U64,
-  ZERO,
+  SUPPLY_ONE,
+  METADATA_PROGRAM_ID,
 } from "./constants";
 import BN from "bn.js";
+
+import { programs } from "@metaplex/js";
 
 /**
  * Bigint-like number.
@@ -40,4 +44,77 @@ export function parseBigintIsh(bigintIsh: BigintIsh): JSBI {
     : typeof bigintIsh === "bigint" || BN.isBN(bigintIsh)
     ? JSBI.BigInt(bigintIsh.toString())
     : JSBI.BigInt(bigintIsh);
+}
+
+export async function getAllNFTsOwned(
+  owner: PublicKey,
+  connection: Connection
+) {
+  const { value: tokens } = await connection.getParsedTokenAccountsByOwner(
+    owner,
+    {
+      programId: TOKEN_PROGRAM_ID,
+    }
+  );
+
+  const nfts: {
+    mint: PublicKey;
+    metadata: any;
+    masterEdition: any;
+  }[] = [];
+
+  for (let token of tokens) {
+    const {
+      info: { mint: mintRaw },
+    } = token.account.data.parsed;
+    const mint = new PublicKey(mintRaw);
+    const mintAccount = await connection.getAccountInfo(mint);
+    const mintAccountDecoded = MintLayout.decode(mintAccount?.data);
+
+    if (
+      mintAccountDecoded.decimals === 0 &&
+      SUPPLY_ONE.equals(mintAccountDecoded.supply)
+    ) {
+      const [metadataPub] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from("metadata"),
+          METADATA_PROGRAM_ID.toBuffer(),
+          mint.toBuffer(),
+        ],
+        METADATA_PROGRAM_ID
+      );
+
+      if (!(await connection.getAccountInfo(metadataPub))) continue;
+
+      const metadata = await programs.metadata.Metadata.load(
+        connection,
+        metadataPub
+      );
+
+      const [masterEditionPDA] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from("metadata"),
+          METADATA_PROGRAM_ID.toBuffer(),
+          mint.toBuffer(),
+          Buffer.from("edition"),
+        ],
+        METADATA_PROGRAM_ID
+      );
+
+      if (!(await connection.getAccountInfo(masterEditionPDA))) continue;
+
+      const masterEdition = await programs.metadata.MasterEdition.load(
+        connection,
+        masterEditionPDA
+      );
+
+      nfts.push({
+        mint,
+        metadata: { ...metadata.data, address: metadataPub },
+        masterEdition: { ...masterEdition.data, address: masterEditionPDA },
+      });
+    }
+  }
+
+  return nfts;
 }

@@ -5,7 +5,7 @@ test = "yarn ts-mocha -t 30000"
 
 [provider]
 cluster = "devnet"
-wallet = "~/solana-burner-keys/bob-devnet.json"
+wallet = "./src/keypairs/payer.json"
 
 [programs.mainnet]
 quarry_merge_mine = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"
@@ -32,9 +32,9 @@ quarry_redeemer = "QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"
 quarry_registry = "QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"
 
 [programs.localnet]
-quarry_merge_mine = "QMMD16kjauP5knBwxNUJRZ1Z5o3deBuFrqVjBVmmqto"
-quarry_mine = "QMNeHCGYnLVDn1icRAfQZpjPLBNkfGbSKRB83G5d8KB"
-quarry_mint_wrapper = "QMWoBmAyJLAsA1Lh9ugMTw2gciTihncciphzdNzdZYV"
-quarry_operator = "QoP6NfrQbaGnccXQrMLUkog2tQZ4C1RFgJcwDnT8Kmz"
-quarry_redeemer = "QRDxhMw1P2NEfiw5mYXG79bwfgHTdasY2xNP76XSea9"
-quarry_registry = "QREGBnEj9Sa5uR91AV8u3FxThgP5ZCvdZUW2bHAkfNc"
+quarry_merge_mine = "BKqhDDq6hEiXAp1WgSE778sDj2Bnf4Zg1CPJ2TYoUTMb"
+quarry_mine = "6RRreJu7qYTnp2rWs6n74hKhGHh4D58CaGG9tPm9ZMqk"
+quarry_mint_wrapper = "Cgjj9YzPmcVzZyQJ7FJTGH3Sq4vZprGLH5uuXh7LbUcp"
+quarry_operator = "Ah6jDnUfcSydX3z9oXya5AcQjup8Ywtq2ndntdX874zd"
+quarry_redeemer = "6ikGtarycL6yg7VwLqWhpx9jDT5aNbYfB968pqK95an2"
+quarry_registry = "3Lo3FqhRKcZvX4AzPpg4RGH5QjF6YKkV4e3URVK9Mgkf"

@@ -227,12 +227,6 @@
         {
           "name": "bump",
           "type": "u8"
-        },
-        {
-          "name": "candyMachineId",
-          "type": {
-            "option": "publicKey"
-          }
         }
       ]
     },
@@ -661,12 +655,6 @@
           {
             "name": "nftUpdateAuthority",
             "type": "publicKey"
-          },
-          {
-            "name": "candyMachineId",
-            "type": {
-              "option": "publicKey"
-            }
           },
           {
             "name": "bump",

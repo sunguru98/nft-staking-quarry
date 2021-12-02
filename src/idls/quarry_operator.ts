@@ -208,6 +208,11 @@ export type QuarryOperatorIDL =
           "isSigner": false
         },
         {
+          "name": "nftUpdateAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "payer",
           "isMut": true,
           "isSigner": true
@@ -227,6 +232,12 @@ export type QuarryOperatorIDL =
         {
           "name": "bump",
           "type": "u8"
+        },
+        {
+          "name": "candyMachineId",
+          "type": {
+            "option": "publicKey"
+          }
         }
       ]
     },
@@ -537,6 +548,11 @@ export const QuarryOperatorJSON: QuarryOperatorIDL =
           "isSigner": false
         },
         {
+          "name": "nftUpdateAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "payer",
           "isMut": true,
           "isSigner": true
@@ -556,6 +572,12 @@ export const QuarryOperatorJSON: QuarryOperatorIDL =
         {
           "name": "bump",
           "type": "u8"
+        },
+        {
+          "name": "candyMachineId",
+          "type": {
+            "option": "publicKey"
+          }
         }
       ]
     },

@@ -1,3 +1,4 @@
+import { config } from "dotenv";
 import {
   DEFAULT_TOKEN_DECIMALS,
   getAnchorProgram,
@@ -10,6 +11,8 @@ import { MintLayout, Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { parseTokenHardCap } from "../utils";
 
 import { writeJSON } from "fs-extra";
+
+config();
 
 const {
   provider: { connection: SOLANA_CONNECTION, wallet },

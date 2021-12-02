@@ -1,3 +1,4 @@
+import { config } from "dotenv";
 import { QuarryMintWrapperJSON } from "./../idls/quarry_mint_wrapper";
 import {
   PublicKey,
@@ -8,6 +9,8 @@ import {
 import { ANNUAL_REWARDS_RATE, getAnchorProgram } from "./../constants";
 import { QuarryMineJSON } from "./../idls/quarry_mine";
 import { getRewarderPDA } from "../pda";
+
+config();
 
 import fs from "fs-extra";
 import {

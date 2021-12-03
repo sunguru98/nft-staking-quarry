@@ -12,7 +12,7 @@ use vipers::unwrap_int;
 
 impl MergeMiner {
     /// Initializes a [quarry_mine::Miner] for the [MergeMiner].
-    pub fn init_miner(&self, init: &InitMiner, bump: u8) -> ProgramResult {
+    pub fn init_miner(&self, init: &InitMiner, bump: u8, metadata_bump: u8) -> ProgramResult {
         let seeds = gen_merge_miner_signer_seeds!(self);
         let signer_seeds = &[&seeds[..]];
         let cpi_ctx = CpiContext::new_with_signer(
@@ -20,7 +20,7 @@ impl MergeMiner {
             init.to_create_miner_accounts(),
             signer_seeds,
         );
-        quarry_mine::cpi::create_miner(cpi_ctx, bump)
+        quarry_mine::cpi::create_miner(cpi_ctx, bump, metadata_bump)
     }
 
     /// Stakes all available primary tokens owned by the [MergeMiner] into the primary miner.

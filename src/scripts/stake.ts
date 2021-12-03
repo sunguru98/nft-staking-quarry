@@ -75,7 +75,7 @@ const {
   );
 
   if (minerAuthNFTs.length) {
-    const nft = minerAuthNFTs[0]!;
+    const nft = minerAuthNFTs[1]!;
 
     const minerAuthAssociatedTokenAddress =
       await Token.getAssociatedTokenAddress(
@@ -95,6 +95,8 @@ const {
       "Miner Authority Associated Token Address:",
       minerAuthAssociatedTokenAddress.toString()
     );
+
+    console.log("NFT Metadata address:", nft.metadata.address.toString());
 
     console.log(
       `Staking NFT from Miner Auth Wallet ${minerAuthAssociatedTokenAddress.toString()} to Miner Vault Wallet ${minerPDAAssocToken.toString()}`
@@ -120,6 +122,16 @@ const {
 
     const signedTransaction = await minerWallet.signTransaction(transaction);
     await SOLANA_CONNECTION.sendRawTransaction(signedTransaction.serialize());
+
+    await fs.writeJSON(
+      `${__dirname}/../pubkeys/stakedNFTMetadata.json`,
+      nft.metadata.address.toString()
+    );
+
+    await fs.writeJSON(
+      `${__dirname}/../pubkeys/stakedNFTMint.json`,
+      nft.mint.toString()
+    );
   } else {
     console.log("No NFTs under the miner authority");
   }

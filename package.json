@@ -33,6 +33,8 @@
     "createRewarder": "ts-node src/scripts/createRewarder.ts",
     "createQuarry": "ts-node src/scripts/createQuarry.ts",
     "createMiner": "ts-node src/scripts/createMiner.ts",
-    "stake": "ts-node src/scripts/stake.ts"
+    "stake": "ts-node src/scripts/stake.ts",
+    "unstake": "ts-node src/scripts/unstake.ts",
+    "getNFTs": "ts-node src/scripts/getNFTs.ts"
   }
 }

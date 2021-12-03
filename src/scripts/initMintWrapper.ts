@@ -92,7 +92,7 @@ const PAYER = wallet.publicKey;
   await SOLANA_CONNECTION.sendRawTransaction(signedTransaction.serialize());
 
   await writeJSON(
-    `${__dirname}/../pubkeys/mint.json`,
+    `${__dirname}/../pubkeys/rewardsMint.json`,
     honeyMintKeypair.publicKey.toString()
   );
   await writeJSON(

@@ -66,7 +66,7 @@ const {
   if (minerAuthNFTs.length) {
     console.log("Miner Authority:", minerAuthWallet.publicKey.toString());
     console.log("Total owned NFTs", minerAuthNFTs.length);
-    const nft = minerAuthNFTs[2]!;
+    const nft = minerAuthNFTs[0]!;
     console.log("Staking NFT of Mint:", nft.mint.toString());
 
     const minerAuthAssociatedTokenAddress =
@@ -104,11 +104,10 @@ const {
       true
     );
 
+    console.log("Miner NFT Vault address:", minerVaultAssocAddress.toString());
+
     if (!(await SOLANA_CONNECTION.getAccountInfo(minerVaultAssocAddress))) {
-      console.log(
-        "Creating Associated Token Address for Miner:",
-        minerVaultAssocAddress.toString()
-      );
+      console.log("Creating Associated Token Address for Miner");
       const createMinerVaultAssociatedTokenIx =
         Token.createAssociatedTokenAccountInstruction(
           ASSOCIATED_TOKEN_PROGRAM_ID,

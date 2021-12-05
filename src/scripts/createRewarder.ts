@@ -18,6 +18,7 @@ import {
   Token,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
+import BN from "bn.js";
 
 const {
   instruction: programInstruction,
@@ -148,7 +149,27 @@ const PAYER = wallet.publicKey;
         systemProgram: SystemProgram.programId,
       },
     });
+
+    console.log(
+      "Setting minter token allowance to ",
+      ANNUAL_REWARDS_RATE.toNumber()
+    );
+
+    const setMinterAllowanceIx = mintWrapperTransaction.minterUpdate(
+      new BN(ANNUAL_REWARDS_RATE),
+      {
+        accounts: {
+          auth: {
+            admin: wallet.publicKey,
+            mintWrapper: mintWrapperPDA,
+          },
+          minter: minterPDA,
+        },
+      }
+    );
+
     transaction.add(createMinterIx);
+    transaction.add(setMinterAllowanceIx);
   }
 
   const signedTransaction = await wallet.signTransaction(transaction);

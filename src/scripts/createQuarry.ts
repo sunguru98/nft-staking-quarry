@@ -1,4 +1,3 @@
-import * as anchor from "@project-serum/anchor";
 import { config } from "dotenv";
 import fs from "fs-extra";
 import { QuarryMineJSON } from "./../idls/quarry_mine";
@@ -6,9 +5,9 @@ import { QuarryMineJSON } from "./../idls/quarry_mine";
 config();
 
 import {
-  ANNUAL_REWARDS_RATE,
   getAnchorProgram,
   NFT_UPDATE_AUTHORITY,
+  QUARRY_SHARE,
 } from "../constants";
 import { getQuarryPDA } from "../pda";
 import {
@@ -24,8 +23,6 @@ const {
 
 const REWARDER_AUTHORITY = wallet.publicKey;
 const PAYER = wallet.publicKey;
-
-const QUARRY_SHARE = ANNUAL_REWARDS_RATE.div(new anchor.BN(10));
 
 (async function () {
   const { rewarderPDA, quarryPDA, bump } = await getQuarryPDA();

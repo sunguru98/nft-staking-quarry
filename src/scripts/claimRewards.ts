@@ -19,6 +19,8 @@ const {
     Keypair.fromSecretKey(MINER_SECRET_KEY)
   );
 
+  console.log("Miner Authority:", minerAuthWallet.publicKey.toString());
+
   const mintWrapperPDARaw = fs.readJSONSync(
     `${__dirname}/../pubkeys/mintWrapperPDA.json`
   );
@@ -29,7 +31,7 @@ const {
     `${__dirname}/../pubkeys/rewardsMint.json`
   );
   const rewarderClaimTokenAccountRaw = fs.readJSONSync(
-    `${__dirname}/../pubkeys/rewardsMint.json`
+    `${__dirname}/../pubkeys/rewarderPDAFeeToken.json`
   );
   const minerPDARaw = fs.readJSONSync(`${__dirname}/../pubkeys/minerPDA.json`);
   const quarryPDARaw = fs.readJSONSync(
@@ -57,7 +59,7 @@ const {
   const rewarderClaimTokenAccount = new PublicKey(rewarderClaimTokenAccountRaw);
   const minerPDA = new PublicKey(minerPDARaw);
   const quarryPDA = new PublicKey(quarryPDARaw);
-  const rewarderPDA = new PublicKey(quarryPDARaw);
+  const rewarderPDA = new PublicKey(rewarderPDARaw);
 
   const transaction = new Transaction();
   transaction.feePayer = minerAuthWallet.publicKey;
@@ -92,7 +94,10 @@ const {
     transaction.add(createRewardsAssocTokenIx);
   }
 
-  console.log("Claiming Rewards from staking");
+  console.log(
+    "Claiming Rewards from staking and depositing to:",
+    minerAuthRewardsTokenAcc.toString()
+  );
 
   const claimRewardsIx = programInstruction.claimRewards({
     accounts: {

@@ -11,12 +11,14 @@ import JSBI from "jsbi";
 export const SUPPLY_ONE = Buffer.from(
   Uint8Array.from([1, 0, 0, 0, 0, 0, 0, 0])
 );
-
-export const DAILY_REWARDS_RATE = new anchor.BN(1000 * LAMPORTS_PER_SOL);
-export const ANNUAL_REWARDS_RATE = DAILY_REWARDS_RATE.mul(new anchor.BN(365));
-
 export const HONEY_TOKEN_HARD_CAP = 1_000_000_000_000;
 export const DEFAULT_TOKEN_DECIMALS = 6;
+
+export const DAILY_REWARDS_RATE = new anchor.BN(
+  1000 * 10 ** DEFAULT_TOKEN_DECIMALS
+);
+export const ANNUAL_REWARDS_RATE = DAILY_REWARDS_RATE.mul(new anchor.BN(365));
+export const QUARRY_SHARE = ANNUAL_REWARDS_RATE.div(new anchor.BN(10));
 
 export const ZERO = JSBI.BigInt(0);
 export const MAX_U64 = JSBI.BigInt("0xffffffffffffffff");
@@ -30,7 +32,7 @@ export const MINER_SECRET_KEY = new Uint8Array(
 );
 
 export const NFT_UPDATE_AUTHORITY = new PublicKey(
-  "Ew81tE7S6ZeChD97cGabZRJCZSdDnMg9tDjUAVJDfV3S"
+  "Ew81tE7S6ZeChD97cGabZRJCZSdDnMg9tDjUAVJDfV3S" // Candy machine where we deployed on devnet
 );
 
 export const METADATA_PROGRAM_ID = new PublicKey(

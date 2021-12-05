@@ -27,6 +27,7 @@ impl Rewarder {
         &self,
         quarry_rewards_share: u64,
     ) -> Result<u64, ProgramError> {
+        msg!("2. Checking for Invalid reward share");
         require!(
             quarry_rewards_share <= self.total_rewards_shares,
             InvalidRewardsShare
@@ -60,6 +61,7 @@ impl<'info> ClaimRewards<'info> {
 
         // Calculate rewards
         let max_claim_fee_millibps = self.stake.rewarder.max_claim_fee_millibps;
+        msg!("5. Checking for max claim fee");
         require!(max_claim_fee_millibps < 10_000 * 1_000, InvalidMaxClaimFee);
         let max_claim_fee = unwrap_int!((amount_claimable as u128)
             .checked_mul(max_claim_fee_millibps.into())

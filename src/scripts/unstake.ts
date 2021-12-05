@@ -11,7 +11,6 @@ import {
 import { getAllNFTsOwned } from "../utils";
 
 const {
-  coder,
   instruction: programInstruction,
   provider: { connection: SOLANA_CONNECTION },
 } = getAnchorProgram(QuarryMineJSON, "mine");
@@ -54,9 +53,21 @@ const {
     throw new Error("Miner PDA not present");
   }
 
+  const stakedNFTMintRaw = await fs.readJSON(
+    `${__dirname}/../pubkeys/stakedNFTMint.json`,
+    {
+      encoding: "utf-8",
+    }
+  );
+
+  if (!stakedNFTMintRaw) {
+    throw new Error("Staked NFT Mint not present");
+  }
+
   const minerPDA = new PublicKey(minerPDARaw);
   const rewarderPDA = new PublicKey(rewarderPDARaw);
   const quarryPDA = new PublicKey(quarryPDARaw);
+  const stakedNFTMint = new PublicKey(stakedNFTMintRaw);
 
   const minerAuthNFTs = await getAllNFTsOwned(
     minerAuthWallet.publicKey,
@@ -65,7 +76,8 @@ const {
 
   if (minerAuthNFTs.length) {
     console.log("Total owned NFTs", minerAuthNFTs.length);
-    const nft = minerAuthNFTs[2]!;
+    const nft = minerAuthNFTs.find((n) => n.mint.equals(stakedNFTMint));
+    if (!nft) throw new Error("Cannot find staked NFT mint");
     console.log("Unstaking NFT of Mint:", nft.mint.toString());
 
     const minerAuthAssociatedTokenAddress =
@@ -103,12 +115,14 @@ const {
       true
     );
 
+    console.log("Miner NFT Vault address:", minerVaultAssocAddress.toString());
+
     if (!(await SOLANA_CONNECTION.getAccountInfo(minerVaultAssocAddress))) {
       throw new Error("Miner NFT Vault doesn't exist");
     }
 
     console.log(
-      `Unstaking NFT from Miner Auth Wallet ${minerAuthAssociatedTokenAddress.toString()} to Miner Vault Wallet ${minerVaultAssocAddress.toString()}`
+      `Unstaking NFT from Miner Vault Wallet ${minerVaultAssocAddress.toString()} to Miner Auth Wallet ${minerAuthAssociatedTokenAddress.toString()}`
     );
 
     const unStakeNFTIx = programInstruction.withdrawNft(1, nft.metadata.bump, {

@@ -38,9 +38,9 @@ declare_id!("6RRreJu7qYTnp2rWs6n74hKhGHh4D58CaGG9tPm9ZMqk");
 // 2_305_843_009_213_693_951
 pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
 
-/// The fees of new [Rewarder]s: 300,000 milliBPS = 300 BP or 3%.
+/// The fees of new [Rewarder]s: 1,000 milliBPS = 1 BP or 0.01%.
 /// This may be changed by governance in the future via program upgrade.
-pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 300_000;
+pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 1_000;
 
 /// Program for [quarry_mine].
 #[program]

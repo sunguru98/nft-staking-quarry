@@ -38,9 +38,9 @@ declare_id!("6RRreJu7qYTnp2rWs6n74hKhGHh4D58CaGG9tPm9ZMqk");
 // 2_305_843_009_213_693_951
 pub const MAX_ANNUAL_REWARDS_RATE: u64 = u64::MAX >> 3;
 
-/// The fees of new [Rewarder]s: 1,000 milliBPS = 1 BP or 0.01%.
+/// The fees of new [Rewarder]s: 300,000 milliBPS = 300 BP or 3%.
 /// This may be changed by governance in the future via program upgrade.
-pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 1_000;
+pub const DEFAULT_CLAIM_FEE_MILLIBPS: u64 = 300_000;
 
 /// Program for [quarry_mine].
 #[program]
@@ -248,20 +248,17 @@ pub mod quarry_mine {
     /// Creates a [Miner] for the given authority.
     ///
     /// Anyone can call this; this is an associated account.
-    #[access_control(ctx.accounts.validate(metadata_bump))]
-    pub fn create_miner(ctx: Context<CreateMiner>, bump: u8, metadata_bump: u8) -> ProgramResult {
+    #[access_control(ctx.accounts.validate())]
+    pub fn create_miner(ctx: Context<CreateMiner>, bump: u8) -> ProgramResult {
         let quarry = &mut ctx.accounts.quarry;
         let index = quarry.num_miners;
         quarry.num_miners = unwrap_int!(quarry.num_miners.checked_add(1));
 
         let miner = &mut ctx.accounts.miner;
-        miner.authority = ctx.accounts.authority.key();
         miner.bump = bump;
-        miner.metadata_bump = metadata_bump;
+        miner.authority = ctx.accounts.authority.key();
         miner.quarry_key = ctx.accounts.quarry.key();
-        miner.nft_token_vault_key = ctx.accounts.miner_nft_vault.key();
-        miner.nft_metadata = ctx.accounts.token_metadata.key();
-        miner.rewards_earned = 0;
+        miner.nft_update_authority = ctx.accounts.nft_update_authority.key();
         miner.rewards_per_token_paid = 0;
         miner.balance = 0;
         miner.index = index;
@@ -275,23 +272,9 @@ pub mod quarry_mine {
         Ok(())
     }
 
-    /// Claims rewards for the [Miner].
-    #[access_control(ctx.accounts.validate())]
-    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
-        let miner = &mut ctx.accounts.stake.miner;
-
-        let now = Clock::get()?.unix_timestamp;
-        let quarry = &mut ctx.accounts.stake.quarry;
-        quarry.update_rewards_and_miner(miner, &ctx.accounts.stake.rewarder, now)?;
-
-        ctx.accounts.calculate_and_claim_rewards()?;
-
-        Ok(())
-    }
-
     /// Stakes tokens into the [Miner].
-    #[access_control(ctx.accounts.validate())]
-    pub fn stake_nft(ctx: Context<UserStake>, amount: u8) -> ProgramResult {
+    #[access_control(ctx.accounts.validate(metadata_bump))]
+    pub fn stake_nft(ctx: Context<UserStake>, amount: u8, metadata_bump: u8) -> ProgramResult {
         if amount == 0 {
             // noop
             return Ok(());
@@ -314,12 +297,12 @@ pub mod quarry_mine {
 
         let cpi_accounts = Transfer {
             from: ctx.accounts.token_account.to_account_info(),
-            to: ctx.accounts.nft_token_vault_key.to_account_info(),
+            to: ctx.accounts.miner_nft_vault.to_account_info(),
             authority: ctx.accounts.authority.to_account_info(),
         };
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
-        // Transfer NFT to quarry vault
+        // Transfer NFT to miner vault
         token::transfer(cpi_context, 1)?;
 
         emit!(StakeEvent {
@@ -333,15 +316,15 @@ pub mod quarry_mine {
     }
 
     /// Withdraws tokens from the [Miner].
-    #[access_control(ctx.accounts.validate())]
-    pub fn withdraw_nft(ctx: Context<UserStake>, amount: u8) -> ProgramResult {
+    #[access_control(ctx.accounts.validate(metadata_bump))]
+    pub fn withdraw_nft(ctx: Context<UserStake>, amount: u8, metadata_bump: u8) -> ProgramResult {
         if amount == 0 {
             // noop
             return Ok(());
         }
 
         require!(
-            amount == ctx.accounts.nft_token_vault_key.amount as u8,
+            amount == ctx.accounts.miner_nft_vault.amount as u8,
             InsufficientBalance
         );
 
@@ -364,7 +347,7 @@ pub mod quarry_mine {
         ];
         let signer_seeds = &[&miner_seeds[..]];
         let cpi_accounts = token::Transfer {
-            from: ctx.accounts.nft_token_vault_key.to_account_info(),
+            from: ctx.accounts.miner_nft_vault.to_account_info(),
             to: ctx.accounts.token_account.to_account_info(),
             authority: ctx.accounts.miner.to_account_info(),
         };
@@ -386,11 +369,25 @@ pub mod quarry_mine {
         Ok(())
     }
 
+    /// Claims rewards for the [Miner].
+    #[access_control(ctx.accounts.validate())]
+    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> ProgramResult {
+        let miner = &mut ctx.accounts.stake.miner;
+
+        let now = Clock::get()?.unix_timestamp;
+        let quarry = &mut ctx.accounts.stake.quarry;
+        quarry.update_rewards_and_miner(miner, &ctx.accounts.stake.rewarder, now)?;
+
+        ctx.accounts.calculate_and_claim_rewards()?;
+
+        Ok(())
+    }
+
     /// --------------------------------
     /// Protocol Functions
     /// --------------------------------
 
-    /// Extracts fees to the Quarry DAO.
+    /// Extracts fees to the Honey DAO.
     /// This can be called by anyone.
     #[access_control(ctx.accounts.validate())]
     pub fn extract_fees(ctx: Context<ExtractFees>) -> ProgramResult {
@@ -516,14 +513,8 @@ pub struct Miner {
     /// Bump.
     pub bump: u8,
 
-    /// Metadata Bump
-    pub metadata_bump: u8,
-
-    /// [TokenAccount] to hold the [Miner]'s staked NFT.
-    pub nft_token_vault_key: Pubkey,
-
-    /// Metadata of upcoming staked NFT
-    pub nft_metadata: Pubkey,
+    /// Update authority of the NFT that is being staked
+    pub nft_update_authority: Pubkey,
 
     /// Stores the amount of tokens that the [Miner] may claim.
     /// Whenever the [Miner] claims tokens, this is reset to 0.
@@ -727,7 +718,7 @@ pub struct UpdateQuarryRewards<'info> {
 
 /// Accounts for [quarry_mine::create_miner].
 #[derive(Accounts)]
-#[instruction(bump: u8, metadata_bump: u8)]
+#[instruction(bump: u8)]
 pub struct CreateMiner<'info> {
     /// Authority of the [Miner].
     pub authority: Signer<'info>,
@@ -759,17 +750,51 @@ pub struct CreateMiner<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
 
-    /// [Mint] of the NFT to create a [Quarry] for.
-    pub token_mint: Account<'info, Mint>,
-
-    /// NFT Token Metadata to create a [Quarry] for
-    pub token_metadata: Box<Account<'info, Metadata>>,
-
-    /// [TokenAccount] holding the token NFT [Mint].
-    pub miner_nft_vault: Account<'info, TokenAccount>,
+    /// NFT Update Authority
+    pub nft_update_authority: UncheckedAccount<'info>,
 
     /// SPL Token program.
     pub token_program: Program<'info, Token>,
+}
+
+/// Staking accounts
+///
+/// This accounts struct is always used in the context of the user authority
+/// staking into an account. This is NEVER used by an admin.
+///
+/// Validation should be extremely conservative.
+#[derive(Accounts, Clone)]
+pub struct UserStake<'info> {
+    /// Miner authority (i.e. the user).
+    pub authority: Signer<'info>,
+
+    /// Miner.
+    #[account(mut)]
+    pub miner: Account<'info, Miner>,
+
+    /// Quarry to claim from.
+    #[account(mut)]
+    pub quarry: Account<'info, Quarry>,
+
+    /// NFT Mint that needs to be staked
+    pub token_mint: Box<Account<'info, Mint>>,
+
+    /// NFT Vault of the miner.
+    #[account(mut)]
+    pub miner_nft_vault: Box<Account<'info, TokenAccount>>,
+
+    /// NFT Metadata
+    pub token_metadata: Account<'info, Metadata>,
+
+    /// User's staked token account
+    #[account(mut)]
+    pub token_account: Account<'info, TokenAccount>,
+
+    /// Token program
+    pub token_program: Program<'info, Token>,
+
+    /// Rewarder
+    pub rewarder: Box<Account<'info, Rewarder>>,
 }
 
 /// ClaimRewards accounts
@@ -819,58 +844,12 @@ pub struct UserClaim<'info> {
     #[account(mut)]
     pub quarry: Account<'info, Quarry>,
 
-    /// Placeholder for the miner vault.
-    #[account(mut)]
-    pub unused_miner_vault: UncheckedAccount<'info>,
-
-    /// Placeholder for the user's staked token account.
-    #[account(mut)]
-    pub unused_token_account: UncheckedAccount<'info>,
-
     /// Token program
     pub token_program: Program<'info, Token>,
 
     /// Rewarder
     pub rewarder: Account<'info, Rewarder>,
 }
-
-/// Staking accounts
-///
-/// This accounts struct is always used in the context of the user authority
-/// staking into an account. This is NEVER used by an admin.
-///
-/// Validation should be extremely conservative.
-#[derive(Accounts, Clone)]
-pub struct UserStake<'info> {
-    /// Miner authority (i.e. the user).
-    pub authority: Signer<'info>,
-
-    /// Miner.
-    #[account(mut)]
-    pub miner: Account<'info, Miner>,
-
-    /// Quarry to claim from.
-    #[account(mut)]
-    pub quarry: Account<'info, Quarry>,
-
-    /// NFT Vault of the miner.
-    #[account(mut)]
-    pub nft_token_vault_key: Box<Account<'info, TokenAccount>>,
-
-    /// NFT Metadata
-    pub nft_metadata: Account<'info, Metadata>,
-
-    /// User's staked token account
-    #[account(mut)]
-    pub token_account: Account<'info, TokenAccount>,
-
-    /// Token program
-    pub token_program: Program<'info, Token>,
-
-    /// Rewarder
-    pub rewarder: Account<'info, Rewarder>,
-}
-
 /// Accounts for [quarry_mine::extract_fees].
 #[derive(Accounts)]
 pub struct ExtractFees<'info> {

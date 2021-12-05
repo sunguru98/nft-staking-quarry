@@ -35,6 +35,8 @@
     "createMiner": "ts-node src/scripts/createMiner.ts",
     "stake": "ts-node src/scripts/stake.ts",
     "unstake": "ts-node src/scripts/unstake.ts",
-    "getNFTs": "ts-node src/scripts/getNFTs.ts"
+    "claimRewards": "ts-node src/scripts/claimRewards.ts",
+    "getNFTs": "ts-node src/scripts/getUserNFTs.ts",
+    "balance": "ts-node src/scripts/getMinerBalance.ts"
   }
 }

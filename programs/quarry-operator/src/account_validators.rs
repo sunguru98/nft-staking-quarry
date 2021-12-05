@@ -3,7 +3,7 @@ use crate::{
     SetRole, WithDelegate,
 };
 use anchor_lang::prelude::*;
-use vipers::{assert_keys, validate::Validate};
+use vipers::{assert_keys_eq, validate::Validate};
 
 impl<'info> Validate<'info> for CreateOperator<'info> {
     fn validate(&self) -> ProgramResult {
@@ -20,7 +20,7 @@ impl<'info> Validate<'info> for SetRole<'info> {
 
 impl<'info> Validate<'info> for WithDelegate<'info> {
     fn validate(&self) -> ProgramResult {
-        assert_keys!(self.operator.rewarder, *self.rewarder, "operator.rewarder");
+        assert_keys_eq!(self.operator.rewarder, *self.rewarder, "operator.rewarder");
         Ok(())
     }
 }

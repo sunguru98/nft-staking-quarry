@@ -343,17 +343,7 @@ export type QuarryMineIDL =
           "isSigner": true
         },
         {
-          "name": "tokenMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenMetadata",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "minerNftVault",
+          "name": "nftUpdateAuthority",
           "isMut": false,
           "isSigner": false
         },
@@ -366,6 +356,122 @@ export type QuarryMineIDL =
       "args": [
         {
           "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "stakeNft",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "miner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "quarry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "minerNftVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rewarder",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u8"
+        },
+        {
+          "name": "metadataBump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "withdrawNft",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "miner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "quarry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "minerNftVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rewarder",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
           "type": "u8"
         },
         {
@@ -426,16 +532,6 @@ export type QuarryMineIDL =
               "isSigner": false
             },
             {
-              "name": "unusedMinerVault",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "unusedTokenAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "tokenProgram",
               "isMut": false,
               "isSigner": false
@@ -449,108 +545,6 @@ export type QuarryMineIDL =
         }
       ],
       "args": []
-    },
-    {
-      "name": "stakeNft",
-      "accounts": [
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "miner",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "quarry",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "nftTokenVaultKey",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "nftMetadata",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rewarder",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "withdrawNft",
-      "accounts": [
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "miner",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "quarry",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "nftTokenVaultKey",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "nftMetadata",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rewarder",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u8"
-        }
-      ]
     },
     {
       "name": "extractFees",
@@ -714,15 +708,7 @@ export type QuarryMineIDL =
             "type": "u8"
           },
           {
-            "name": "metadataBump",
-            "type": "u8"
-          },
-          {
-            "name": "nftTokenVaultKey",
-            "type": "publicKey"
-          },
-          {
-            "name": "nftMetadata",
+            "name": "nftUpdateAuthority",
             "type": "publicKey"
           },
           {
@@ -1352,17 +1338,7 @@ export const QuarryMineJSON: QuarryMineIDL =
           "isSigner": true
         },
         {
-          "name": "tokenMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenMetadata",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "minerNftVault",
+          "name": "nftUpdateAuthority",
           "isMut": false,
           "isSigner": false
         },
@@ -1375,6 +1351,122 @@ export const QuarryMineJSON: QuarryMineIDL =
       "args": [
         {
           "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "stakeNft",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "miner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "quarry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "minerNftVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rewarder",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u8"
+        },
+        {
+          "name": "metadataBump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "withdrawNft",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "miner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "quarry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "minerNftVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadata",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rewarder",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
           "type": "u8"
         },
         {
@@ -1435,16 +1527,6 @@ export const QuarryMineJSON: QuarryMineIDL =
               "isSigner": false
             },
             {
-              "name": "unusedMinerVault",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
-              "name": "unusedTokenAccount",
-              "isMut": true,
-              "isSigner": false
-            },
-            {
               "name": "tokenProgram",
               "isMut": false,
               "isSigner": false
@@ -1458,108 +1540,6 @@ export const QuarryMineJSON: QuarryMineIDL =
         }
       ],
       "args": []
-    },
-    {
-      "name": "stakeNft",
-      "accounts": [
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "miner",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "quarry",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "nftTokenVaultKey",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "nftMetadata",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rewarder",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "withdrawNft",
-      "accounts": [
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "miner",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "quarry",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "nftTokenVaultKey",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "nftMetadata",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rewarder",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u8"
-        }
-      ]
     },
     {
       "name": "extractFees",
@@ -1723,15 +1703,7 @@ export const QuarryMineJSON: QuarryMineIDL =
             "type": "u8"
           },
           {
-            "name": "metadataBump",
-            "type": "u8"
-          },
-          {
-            "name": "nftTokenVaultKey",
-            "type": "publicKey"
-          },
-          {
-            "name": "nftMetadata",
+            "name": "nftUpdateAuthority",
             "type": "publicKey"
           },
           {

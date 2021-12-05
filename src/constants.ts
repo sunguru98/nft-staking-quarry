@@ -37,8 +37,14 @@ export const METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 
+export const ENDPOINTS = {
+  devnet: "https://api.devnet.solana.com",
+  mainnet: "https://api.mainnet-beta.solana.com",
+  testnet: "https://api.testnet.solana.com",
+};
+
 export const ANCHOR_PROVIDER = new anchor.Provider(
-  new Connection("https://api.devnet.solana.com"),
+  new Connection(ENDPOINTS.devnet),
   new anchor.Wallet(Keypair.fromSecretKey(PAYER_SECRET_KEY)),
   { skipPreflight: false, commitment: "confirmed" }
 );

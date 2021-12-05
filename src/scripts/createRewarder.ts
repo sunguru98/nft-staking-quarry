@@ -8,7 +8,7 @@ import {
 } from "@solana/web3.js";
 import { ANNUAL_REWARDS_RATE, getAnchorProgram } from "./../constants";
 import { QuarryMineJSON } from "./../idls/quarry_mine";
-import { getRewarderPDA } from "../pda";
+import { getMinterPDA, getRewarderPDA } from "../pda";
 
 config();
 
@@ -54,6 +54,13 @@ const PAYER = wallet.publicKey;
     "MintWrapper",
     mintWrapperData.data
   );
+
+  const transaction = new Transaction();
+  transaction.recentBlockhash = (
+    await SOLANA_CONNECTION.getRecentBlockhash()
+  ).blockhash;
+
+  transaction.feePayer = PAYER;
 
   const associatedTokenAddress = await Token.getAssociatedTokenAddress(
     ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -110,18 +117,39 @@ const PAYER = wallet.publicKey;
     }
   );
 
-  const transaction = new Transaction();
-  transaction.recentBlockhash = (
-    await SOLANA_CONNECTION.getRecentBlockhash()
-  ).blockhash;
-
-  transaction.feePayer = PAYER;
-
   transaction.add(
     createAssociatedTokenIx,
     createNewRewarderIx,
     setAnnualRewardsIx
   );
+
+  const { minterPDA, bump: minterBump } = await getMinterPDA(
+    rewarderPDA.toString()
+  );
+
+  if (!(await SOLANA_CONNECTION.getAccountInfo(minterPDA))) {
+    console.log(
+      "Creating Minter Account as a Proxy for Rewarder PDA:",
+      minterPDA.toString()
+    );
+    const { transaction: mintWrapperTransaction } = getAnchorProgram(
+      QuarryMintWrapperJSON,
+      "mintWrapper"
+    );
+    const createMinterIx = mintWrapperTransaction.newMinter(minterBump, {
+      accounts: {
+        auth: {
+          mintWrapper: mintWrapperPDA,
+          admin: wallet.publicKey,
+        },
+        minterAuthority: rewarderPDA,
+        minter: minterPDA,
+        payer: wallet.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+    });
+    transaction.add(createMinterIx);
+  }
 
   const signedTransaction = await wallet.signTransaction(transaction);
   signedTransaction.partialSign(baseKeypair);
@@ -134,7 +162,12 @@ const PAYER = wallet.publicKey;
   );
 
   await fs.writeJSON(
-    `${__dirname}/../pubkeys/rewarderPDAToken.json`,
+    `${__dirname}/../pubkeys/minterPDA.json`,
+    minterPDA.toString()
+  );
+
+  await fs.writeJSON(
+    `${__dirname}/../pubkeys/rewarderPDAFeeToken.json`,
     associatedTokenAddress.toString()
   );
 })();

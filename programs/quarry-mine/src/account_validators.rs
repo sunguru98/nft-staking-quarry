@@ -129,8 +129,26 @@ impl<'info> Validate<'info> for UpdateQuarryRewards<'info> {
 /// Miner functions
 /// --------------------------------
 
-impl<'info> CreateMiner<'info> {
+impl<'info> Validate<'info> for CreateMiner<'info> {
+    fn validate(&self) -> ProgramResult {
+        require!(!self.rewarder.is_paused, Paused);
+
+        assert_keys_eq!(
+            self.nft_update_authority,
+            self.quarry.nft_update_authority,
+            "nft update authority"
+        );
+
+        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
+
+        Ok(())
+    }
+}
+
+impl<'info> UserStake<'info> {
+    /// Validates the UserStake.
     pub fn validate(&self, metadata_bump: u8) -> ProgramResult {
+        // metadata check
         msg!(
             "Received Metadata Pubkey {}",
             self.token_metadata.key().to_string()
@@ -154,19 +172,49 @@ impl<'info> CreateMiner<'info> {
             "miner nft metadata"
         );
 
-        require!(!self.rewarder.is_paused, Paused);
+        // miner_nft_vault
         assert_ata!(
-            self.miner_nft_vault,
+            *self.miner_nft_vault,
             self.miner,
-            self.token_mint,
+            *self.token_mint,
             "miner vault"
         );
-        assert_keys_eq!(self.miner_nft_vault.owner, self.miner, "miner vault owner");
-        assert_keys_eq!(
-            self.miner_nft_vault.mint,
-            self.token_mint,
-            "miner vault mint"
+
+        // user's staked token_account
+        assert_ata!(
+            self.token_account,
+            self.authority,
+            *self.token_mint,
+            "authority staked token"
         );
+
+        // rewarder is_paused
+        require!(!self.rewarder.is_paused, Paused);
+        // authority
+        require!(self.authority.is_signer, Unauthorized);
+        assert_keys_eq!(self.authority, self.miner.authority, "miner authority");
+
+        // quarry
+        assert_keys_eq!(self.miner.quarry_key, self.quarry.key(), "quarry");
+
+        // token account's state owner check
+        assert_keys_eq!(self.miner_nft_vault.owner, self.miner, "nft vault owner");
+        assert_keys_eq!(self.token_account.owner, self.authority, "token account");
+
+        // nft update authority
+        assert_keys_eq!(
+            self.token_metadata.update_authority,
+            self.miner.nft_update_authority,
+            "nft update authority",
+        );
+
+        assert_keys_eq!(
+            self.token_metadata.update_authority,
+            self.quarry.nft_update_authority,
+            "nft update authority"
+        );
+
+        // rewarder
         assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
 
         Ok(())
@@ -234,50 +282,6 @@ impl<'info> Validate<'info> for UserClaim<'info> {
 
         // quarry
         assert_keys_eq!(self.miner.quarry_key, self.quarry.key(), "quarry");
-
-        // rewarder
-        assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");
-
-        Ok(())
-    }
-}
-
-impl<'info> Validate<'info> for UserStake<'info> {
-    /// Validates the UserStake.
-    fn validate(&self) -> ProgramResult {
-        require!(!self.rewarder.is_paused, Paused);
-        // authority
-        require!(self.authority.is_signer, Unauthorized);
-        assert_keys_eq!(self.authority, self.miner.authority, "miner authority");
-
-        // quarry
-        assert_keys_eq!(self.miner.quarry_key, self.quarry.key(), "quarry");
-
-        // nft_token_vault_key
-        assert_keys_eq!(
-            self.miner.nft_token_vault_key,
-            self.nft_token_vault_key,
-            "minter nft token vault"
-        );
-
-        assert_keys_eq!(
-            self.nft_token_vault_key.owner,
-            self.miner,
-            "nft vault owner"
-        );
-
-        // nft metadata
-        assert_keys_eq!(
-            self.nft_metadata,
-            self.miner.nft_metadata,
-            "miner nft metadata",
-        );
-
-        assert_keys_eq!(
-            self.nft_metadata.update_authority,
-            self.quarry.nft_update_authority,
-            "nft update authority"
-        );
 
         // rewarder
         assert_keys_eq!(self.quarry.rewarder_key, self.rewarder, "rewarder");

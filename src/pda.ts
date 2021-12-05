@@ -18,6 +18,47 @@ export async function getMintWrapperPDA(
   };
 }
 
+export async function getMinterPDA(
+  customRewarder?: string,
+  programId: PublicKey = new PublicKey(PROGRAM_IDS["mintWrapper"])
+) {
+  let rewarderPDARaw =
+    customRewarder ||
+    (await fs.readJSON(`${__dirname}/pubkeys/rewarderPDA.json`, {
+      encoding: "utf-8",
+    }));
+
+  if (!rewarderPDARaw) throw new Error("Rewarder PDA not found");
+
+  let mintWrapperRaw = await fs.readJSON(
+    `${__dirname}/pubkeys/mintWrapperPDA.json`,
+    {
+      encoding: "utf-8",
+    }
+  );
+
+  if (!mintWrapperRaw) throw new Error("Rewarder PDA not found");
+
+  const mintWrapperPDA = new PublicKey(mintWrapperRaw);
+  const rewarderPDA = new PublicKey(rewarderPDARaw);
+
+  const [minterPDA, bump] = await PublicKey.findProgramAddress(
+    [
+      Buffer.from("MintWrapperMinter"),
+      mintWrapperPDA.toBuffer(),
+      rewarderPDA.toBuffer(),
+    ],
+    programId
+  );
+
+  return {
+    rewarderPDA,
+    mintWrapperPDA,
+    minterPDA,
+    bump,
+  };
+}
+
 export async function getRewarderPDA(
   programId: PublicKey = new PublicKey(PROGRAM_IDS["mine"])
 ) {

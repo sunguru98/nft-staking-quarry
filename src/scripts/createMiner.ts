@@ -9,11 +9,7 @@ import {
 } from "../constants";
 import { getMinerPDA } from "../pda";
 import { getAllNFTsOwned } from "../utils";
-import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  Token,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 const {
   instruction: programInstruction,
@@ -70,7 +66,15 @@ const {
       transaction
     );
 
-    await SOLANA_CONNECTION.sendRawTransaction(signedTransaction.serialize());
+    const txHash = await SOLANA_CONNECTION.sendRawTransaction(
+      signedTransaction.serialize()
+    );
+
+    await SOLANA_CONNECTION.confirmTransaction(txHash);
+
+    console.log(`Create Miner Tx Hash: ${txHash}`);
+    console.log(`Miner PDA: ${minerPDA.toString()}`);
+
     await fs.writeJSON(
       `${__dirname}/../pubkeys/minerPDA.json`,
       minerPDA.toString()

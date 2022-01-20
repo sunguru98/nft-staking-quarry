@@ -75,6 +75,37 @@ export type QuarryMintWrapperIDL =
       "args": []
     },
     {
+      "name": "surrenderAuthority",
+      "accounts": [
+        {
+          "name": "mintWrapper",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "newMintAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "acceptAdmin",
       "accounts": [
         {
@@ -348,6 +379,21 @@ export type QuarryMintWrapperIDL =
         },
         {
           "name": "admin",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "MintWrapperAuthoritySurrenderEvent",
+      "fields": [
+        {
+          "name": "mintWrapper",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newMintAuthority",
           "type": "publicKey",
           "index": false
         }
@@ -525,6 +571,37 @@ export const QuarryMintWrapperJSON: QuarryMintWrapperIDL =
       "args": []
     },
     {
+      "name": "surrenderAuthority",
+      "accounts": [
+        {
+          "name": "mintWrapper",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "newMintAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "acceptAdmin",
       "accounts": [
         {
@@ -798,6 +875,21 @@ export const QuarryMintWrapperJSON: QuarryMintWrapperIDL =
         },
         {
           "name": "admin",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "MintWrapperAuthoritySurrenderEvent",
+      "fields": [
+        {
+          "name": "mintWrapper",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newMintAuthority",
           "type": "publicKey",
           "index": false
         }

@@ -190,6 +190,14 @@ pub mod quarry_mine {
     /// Sets the rewards share of a quarry.
     #[access_control(ctx.accounts.validate())]
     pub fn set_rewards_share(ctx: Context<SetRewardsShare>, new_share: u64) -> ProgramResult {
+        // Rewarders annual rate -> 10,950,000
+        // Rewarders total reward share -> 0
+        // Quarry's reward share -> 0
+
+        // New share -> 10
+
+        // New value of rewarders total share -> 20
+
         let rewarder = &mut ctx.accounts.auth.rewarder;
         let quarry = &mut ctx.accounts.quarry;
         rewarder.total_rewards_shares = unwrap_int!(rewarder

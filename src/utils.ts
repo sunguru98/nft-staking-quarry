@@ -19,6 +19,41 @@ import { programs } from "@metaplex/js";
  */
 export declare type BigintIsh = JSBI | string | number | bigint | BN;
 
+export class u128 extends BN {
+  /**
+   * Convert to Buffer representation
+   */
+  override toBuffer(): Buffer {
+    const a = super.toArray().reverse();
+    const b = Buffer.from(a);
+    if (b.length === 16) {
+      return b;
+    }
+    console.assert(b.length < 16, "u128 too large");
+
+    const zeroPad = Buffer.alloc(16);
+    b.copy(zeroPad);
+    return zeroPad;
+  }
+
+  /**
+   * Construct a u64 from Buffer representation
+   */
+  static fromBuffer(buffer: Buffer): u128 {
+    console.assert(
+      buffer.length === 16,
+      `Invalid buffer length: ${buffer.length}`
+    );
+    return new u128(
+      [...buffer]
+        .reverse()
+        .map((i) => `00${i.toString(16)}`.slice(-2))
+        .join(""),
+      16
+    );
+  }
+}
+
 export function parseTokenHardCap(
   tokenDecimals = DEFAULT_TOKEN_DECIMALS,
   tokenHardCap: string = HONEY_TOKEN_HARD_CAP.toString()

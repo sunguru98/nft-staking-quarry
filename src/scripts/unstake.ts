@@ -76,7 +76,7 @@ const {
 
   if (minerAuthNFTs.length) {
     console.log("Total owned NFTs", minerAuthNFTs.length);
-    const nft = minerAuthNFTs.find((n) => n.mint.equals(stakedNFTMint));
+    const nft = minerAuthNFTs[0]!;
     if (!nft) throw new Error("Cannot find staked NFT mint");
     console.log("Unstaking NFT of Mint:", nft.mint.toString());
 
@@ -144,7 +144,17 @@ const {
     const signedTransaction = await minerAuthWallet.signTransaction(
       transaction
     );
-    await SOLANA_CONNECTION.sendRawTransaction(signedTransaction.serialize());
+    const txHash = await SOLANA_CONNECTION.sendRawTransaction(
+      signedTransaction.serialize()
+    );
+
+    await SOLANA_CONNECTION.confirmTransaction(txHash);
+
+    console.log(`Unstake NFT Tx Hash: ${txHash}`);
+    console.log(
+      `Unstaked NFT Metadata PDA: ${nft.metadata.address.toString()}`
+    );
+    console.log(`Unstaked NFT Mint: ${nft.mint.toString()}`);
 
     await fs.writeJSON(
       `${__dirname}/../pubkeys/stakedNFTMetadata.json`,

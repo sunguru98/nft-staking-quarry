@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import { QuarryMintWrapperJSON } from "./../idls/quarry_mint_wrapper";
 import {
+  Keypair,
   PublicKey,
   SystemProgram,
   SYSVAR_CLOCK_PUBKEY,
@@ -27,6 +28,10 @@ const {
 
 const REWARDER_AUTHORITY = wallet.publicKey;
 const PAYER = wallet.publicKey;
+const SIGNER_TWO = Keypair.fromSecretKey(
+  Uint8Array.from(fs.readJSONSync(`${__dirname}/../keypairs/mulsig-2.json`))
+);
+const MINT_WRAPPER_ADMIN = SIGNER_TWO.publicKey;
 
 (async function () {
   const { baseKeypair, bump, rewarderPDA } = await getRewarderPDA();
@@ -35,7 +40,7 @@ const PAYER = wallet.publicKey;
   );
 
   if (!mintWrapperPDA) {
-    throw new Error("Honey Mint Wrapper Does not Exist");
+    throw new Error("Mint Wrapper Does not Exist");
   }
 
   const mintWrapperData = await SOLANA_CONNECTION.getAccountInfo(
@@ -43,7 +48,7 @@ const PAYER = wallet.publicKey;
   );
 
   if (!mintWrapperData?.data) {
-    throw new Error("Honey Mintwrapper data does not exist");
+    throw new Error("Mintwrapper data does not exist");
   }
 
   const mintWrapperProgram = getAnchorProgram(
@@ -133,15 +138,16 @@ const PAYER = wallet.publicKey;
       "Creating Minter Account as a Proxy for Rewarder PDA:",
       minterPDA.toString()
     );
-    const { transaction: mintWrapperTransaction } = getAnchorProgram(
+    const { instruction: mintWrapperInstruction } = getAnchorProgram(
       QuarryMintWrapperJSON,
       "mintWrapper"
     );
-    const createMinterIx = mintWrapperTransaction.newMinter(minterBump, {
+    console.log(MINT_WRAPPER_ADMIN.toString());
+    const createMinterIx = mintWrapperInstruction.newMinter(minterBump, {
       accounts: {
         auth: {
           mintWrapper: mintWrapperPDA,
-          admin: wallet.publicKey,
+          admin: MINT_WRAPPER_ADMIN,
         },
         minterAuthority: rewarderPDA,
         minter: minterPDA,
@@ -155,12 +161,12 @@ const PAYER = wallet.publicKey;
       ANNUAL_REWARDS_RATE.toNumber()
     );
 
-    const setMinterAllowanceIx = mintWrapperTransaction.minterUpdate(
+    const setMinterAllowanceIx = mintWrapperInstruction.minterUpdate(
       new BN(ANNUAL_REWARDS_RATE),
       {
         accounts: {
           auth: {
-            admin: wallet.publicKey,
+            admin: MINT_WRAPPER_ADMIN,
             mintWrapper: mintWrapperPDA,
           },
           minter: minterPDA,
@@ -174,8 +180,20 @@ const PAYER = wallet.publicKey;
 
   const signedTransaction = await wallet.signTransaction(transaction);
   signedTransaction.partialSign(baseKeypair);
+  signedTransaction.partialSign(SIGNER_TWO);
 
-  await SOLANA_CONNECTION.sendRawTransaction(signedTransaction.serialize());
+  const txHash = await SOLANA_CONNECTION.sendRawTransaction(
+    signedTransaction.serialize()
+  );
+
+  await SOLANA_CONNECTION.confirmTransaction(txHash);
+
+  console.log(`Create Rewarder Tx Hash: ${txHash}`);
+  console.log(`Rewarder PDA: ${rewarderPDA.toString()}`);
+  console.log(
+    `Rewarder Claim Fee Token Account: ${associatedTokenAddress.toString()}`
+  );
+  console.log(`Minter PDA: ${minterPDA.toString()}`);
 
   await fs.writeJSON(
     `${__dirname}/../pubkeys/rewarderPDA.json`,

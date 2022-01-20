@@ -8,12 +8,13 @@ mod macros;
 use anchor_lang::prelude::*;
 use anchor_spl::token::Token;
 use anchor_spl::token::{self, Mint, TokenAccount};
+use spl_token::instruction::AuthorityType;
 use vipers::unwrap_int;
 use vipers::validate::Validate;
 
 mod account_validators;
 
-declare_id!("Cgjj9YzPmcVzZyQJ7FJTGH3Sq4vZprGLH5uuXh7LbUcp");
+declare_id!("EqoPvvQbG4g7woE2HUR4rpdtpEVumDzg9KGynvPeL3Pt");
 
 #[program]
 pub mod quarry_mint_wrapper {
@@ -59,6 +60,44 @@ pub mod quarry_mint_wrapper {
             current_admin: mint_wrapper.admin,
             pending_admin: mint_wrapper.pending_admin,
         });
+        Ok(())
+    }
+
+    /// Surrenders the mint authority
+    #[access_control(ctx.accounts.validate())]
+    pub fn surrender_authority(ctx: Context<SurrenderAuthority>) -> Result<()> {
+        let mint_wrapper = &ctx.accounts.mint_wrapper;
+        let mint_wrapper_seeds = gen_wrapper_signer_seeds!(mint_wrapper);
+        let proxy_signer = &[&mint_wrapper_seeds[..]];
+
+        let new_authority = &ctx.accounts.new_mint_authority;
+
+        let change_authority_ctx = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            token::SetAuthority {
+                current_authority: ctx.accounts.mint_wrapper.to_account_info(),
+                account_or_mint: ctx.accounts.token_mint.to_account_info(),
+            },
+            proxy_signer,
+        );
+
+        token::set_authority(
+            change_authority_ctx,
+            AuthorityType::MintTokens,
+            Some(new_authority.key()),
+        )?;
+
+        ctx.accounts.token_mint.reload()?;
+        require!(
+            new_authority.key() == ctx.accounts.token_mint.mint_authority.unwrap(),
+            Unauthorized
+        );
+
+        emit!(MintWrapperAuthoritySurrenderEvent {
+            mint_wrapper: mint_wrapper.key(),
+            new_mint_authority: new_authority.key()
+        });
+
         Ok(())
     }
 
@@ -290,6 +329,26 @@ pub struct AcceptAdmin<'info> {
     pub pending_admin: Signer<'info>,
 }
 
+#[derive(Accounts)]
+pub struct SurrenderAuthority<'info> {
+    /// The [MintWrapper]
+    #[account()]
+    pub mint_wrapper: Account<'info, MintWrapper>,
+
+    /// The [MintWrapper] admin
+    pub admin: Signer<'info>,
+
+    /// The new mint authority
+    pub new_mint_authority: UncheckedAccount<'info>,
+
+    /// Token [Mint]
+    #[account(mut)]
+    pub token_mint: Account<'info, Mint>,
+
+    /// Token program
+    pub token_program: Program<'info, Token>,
+}
+
 /// Accounts for the perform_mint instruction.
 #[derive(Accounts, Clone)]
 pub struct PerformMint<'info> {
@@ -427,6 +486,17 @@ pub struct MintWrapperAdminUpdateEvent {
     pub previous_admin: Pubkey,
     /// The [MintWrapper]'s new admin.
     pub admin: Pubkey,
+}
+
+/// Triggered when a [MintWrapper] surrenders the authority.
+#[event]
+pub struct MintWrapperAuthoritySurrenderEvent {
+    /// The [MintWrapper].
+    #[index]
+    pub mint_wrapper: Pubkey,
+    /// The [Token]'s new mint_authority.
+    #[index]
+    pub new_mint_authority: Pubkey,
 }
 
 /// Triggered when a [Minter] is created.

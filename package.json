@@ -32,13 +32,20 @@
     "idl:generate:nolint": "./scripts/parse-idls.sh && RUN_ESLINT=none ./scripts/generate-idl-types.sh",
     "initMintWrapper": "ts-node src/scripts/initMintWrapper.ts",
     "createRewarder": "ts-node src/scripts/createRewarder.ts",
+    "updateRewarderRate": "ts-node src/scripts/updateRewarderRate.ts",
+    "updateQuarryShare": "ts-node src/scripts/updateQuarryShare.ts",
+    "updateQuarryRewards": "ts-node src/scripts/updateQuarryRewards.ts",
     "createQuarry": "ts-node src/scripts/createQuarry.ts",
     "createMiner": "ts-node src/scripts/createMiner.ts",
+    "createMultiSig": "ts-node src/scripts/createMultiSig.ts",
+    "multiSigIntegrate": "ts-node src/scripts/multiSigIntegrate.ts",
     "stake": "ts-node src/scripts/stake.ts",
     "unstake": "ts-node src/scripts/unstake.ts",
     "claimRewards": "ts-node src/scripts/claimRewards.ts",
     "getNFTs": "ts-node src/scripts/getUserNFTs.ts",
     "balance": "ts-node src/scripts/getMinerBalance.ts",
-    "getRewarderDetails": "ts-node src/scripts/getRewarderDetails.ts"
+    "getRewarderDetails": "ts-node src/scripts/getRewarderDetails.ts",
+    "getQuarryDetails": "ts-node src/scripts/getQuarryDetails.ts",
+    "getMinterDetails": "ts-node src/scripts/getMinterDetails.ts"
   }
 }

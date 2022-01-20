@@ -15,6 +15,8 @@ impl Rewarder {
     /// This should be run only after `total_rewards_shares` has been set.
     /// Do not call this directly. Use `compute_quarry_annual_rewards_rate`.
     fn compute_quarry_annual_rewards_rate_unsafe(&self, quarry_rewards_share: u64) -> Option<u64> {
+        // quarry rewards share -> 10
+        // 10,950,000 * 10 / 20 ->
         (self.annual_rewards_rate as u128)
             .checked_mul(quarry_rewards_share as u128)?
             .checked_div(self.total_rewards_shares as u128)?
@@ -25,7 +27,7 @@ impl Rewarder {
     /// This should be run only after `total_rewards_shares` has been set.
     pub fn compute_quarry_annual_rewards_rate(
         &self,
-        quarry_rewards_share: u64,
+        quarry_rewards_share: u64, // 10
     ) -> Result<u64, ProgramError> {
         msg!("2. Checking for Invalid reward share");
         require!(

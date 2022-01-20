@@ -1,15 +1,16 @@
-import { PublicKey } from '@solana/web3.js';
-import { DEFAULT_TOKEN_DECIMALS, getAnchorProgram } from '../constants';
-import { QuarryMineJSON } from '../idls/quarry_mine';
+import { readJSONSync } from "fs-extra";
+import { PublicKey } from "@solana/web3.js";
+import { DEFAULT_TOKEN_DECIMALS, getAnchorProgram } from "../constants";
+import { QuarryMineJSON } from "../idls/quarry_mine";
 
-import * as BufferLayout from '@solana/buffer-layout';
-import { u64 } from '@solana/spl-token';
+import * as BufferLayout from "@solana/buffer-layout";
+import { u64 } from "@solana/spl-token";
 
 /**
  * Layout for a public key
  */
 export const publicKey = (
-  property: string = 'publicKey'
+  property: string = "publicKey"
 ): BufferLayout.Blob => {
   return BufferLayout.blob(32, property);
 };
@@ -17,50 +18,60 @@ export const publicKey = (
 /**
  * Layout for a 64bit unsigned value
  */
-export const uint64 = (property: string = 'uint64'): BufferLayout.Blob => {
+export const uint64 = (property: string = "uint64"): BufferLayout.Blob => {
   return BufferLayout.blob(8, property);
 };
 
 export const RewarderLayout = BufferLayout.struct([
-  publicKey('base'),
-  BufferLayout.u8('bump'),
-  publicKey('authority'),
-  publicKey('pendingAuthority'),
-  BufferLayout.blob(2, 'numQuarries'),
-  uint64('annualRewardsRate'),
-  uint64('totalRewardsShares'),
-  publicKey('mintWrapper'),
-  publicKey('rewardsTokenMint'),
-  publicKey('claimFeeTokenAccount'),
-  uint64('maxClaimFeeMillibps'),
-  publicKey('pauseAuthority'),
-  BufferLayout.u8('isPaused'),
+  publicKey("base"),
+  BufferLayout.u8("bump"),
+  publicKey("authority"),
+  publicKey("pendingAuthority"),
+  BufferLayout.blob(2, "numQuarries"),
+  uint64("annualRewardsRate"),
+  uint64("totalRewardsShares"),
+  publicKey("mintWrapper"),
+  publicKey("rewardsTokenMint"),
+  publicKey("claimFeeTokenAccount"),
+  uint64("maxClaimFeeMillibps"),
+  publicKey("pauseAuthority"),
+  BufferLayout.u8("isPaused"),
 ]);
 
 const {
   provider: { connection: SOLANA_CONNECTION },
-} = getAnchorProgram(QuarryMineJSON, 'mine');
+} = getAnchorProgram(QuarryMineJSON, "mine");
+
+// const REWARDER_PDA = new PublicKey(
+//   readJSONSync(`${__dirname}/../pubkeys/rewarderPDA.json`)
+// );
 
 const REWARDER_PDA = new PublicKey(
-  '4kk3PYMR1K1xUeVN29ePDDnybrhtCCeqq6HYHj1aeUXF'
+  "4kk3PYMR1K1xUeVN29ePDDnybrhtCCeqq6HYHj1aeUXF"
 );
+
+const ANCHOR_DELIMITTER_OFFSET = 8;
 
 (async function () {
   try {
     const accountInfo = await SOLANA_CONNECTION.getAccountInfo(REWARDER_PDA);
-    const decodedData = RewarderLayout.decode(accountInfo?.data!, 8);
+    const decodedData = RewarderLayout.decode(
+      accountInfo?.data!,
+      ANCHOR_DELIMITTER_OFFSET
+    );
+
     console.log({
       base: new PublicKey(decodedData.base).toString(),
       bump: decodedData.bump,
       authority: new PublicKey(decodedData.authority).toString(),
       pendingAuthority: new PublicKey(decodedData.pendingAuthority).toString(),
       numQuarries: Buffer.from(decodedData.numQuarries).readUInt16LE(0),
-      annualRewardsRate:
-        u64.fromBuffer(decodedData.annualRewardsRate).toNumber() /
-        10 ** DEFAULT_TOKEN_DECIMALS,
-      totalRewardsShare:
-        u64.fromBuffer(decodedData.totalRewardsShares).toNumber() /
-        10 ** DEFAULT_TOKEN_DECIMALS,
+      annualRewardsRate: u64
+        .fromBuffer(decodedData.annualRewardsRate)
+        .toNumber(),
+      totalRewardsShare: u64
+        .fromBuffer(decodedData.totalRewardsShares)
+        .toNumber(),
       mintWrapper: new PublicKey(decodedData.mintWrapper).toString(),
       rewardsTokenMint: new PublicKey(decodedData.rewardsTokenMint).toString(),
       claimFeeTokenAccount: new PublicKey(

@@ -13,7 +13,6 @@ import { getAllNFTsOwned } from "../utils";
 const {
   instruction: programInstruction,
   provider: { connection: SOLANA_CONNECTION },
-  coder,
 } = getAnchorProgram(QuarryMineJSON, "mine");
 
 (async function () {
@@ -143,7 +142,16 @@ const {
     const signedTransaction = await minerAuthWallet.signTransaction(
       transaction
     );
-    await SOLANA_CONNECTION.sendRawTransaction(signedTransaction.serialize());
+
+    const txHash = await SOLANA_CONNECTION.sendRawTransaction(
+      signedTransaction.serialize()
+    );
+
+    await SOLANA_CONNECTION.confirmTransaction(txHash);
+
+    console.log(`Stake NFT Tx Hash: ${txHash}`);
+    console.log(`Staked NFT Metadata PDA: ${nft.metadata.address.toString()}`);
+    console.log(`Staked NFT Mint: ${nft.mint.toString()}`);
 
     await fs.writeJSON(
       `${__dirname}/../pubkeys/stakedNFTMetadata.json`,

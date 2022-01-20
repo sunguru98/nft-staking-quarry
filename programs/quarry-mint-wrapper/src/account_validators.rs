@@ -8,6 +8,7 @@ use crate::NewMinter;
 use crate::NewWrapper;
 use crate::OnlyAdmin;
 use crate::PerformMint;
+use crate::SurrenderAuthority;
 use crate::TransferAdmin;
 
 /// --------------------------------
@@ -20,11 +21,6 @@ impl<'info> Validate<'info> for NewWrapper<'info> {
             self.token_mint.mint_authority.unwrap(),
             self.mint_wrapper,
             "mint authority"
-        );
-        assert_keys_eq!(
-            self.token_mint.freeze_authority.unwrap(),
-            self.mint_wrapper,
-            "freeze authority"
         );
         Ok(())
     }
@@ -65,6 +61,22 @@ impl<'info> Validate<'info> for AcceptAdmin<'info> {
             self.mint_wrapper.pending_admin,
             "pending admin"
         );
+        Ok(())
+    }
+}
+
+impl<'info> Validate<'info> for SurrenderAuthority<'info> {
+    fn validate(&self) -> ProgramResult {
+        require!(self.admin.is_signer, Unauthorized);
+        assert_keys_eq!(self.admin, self.mint_wrapper.admin, "admin");
+
+        require!(self.token_mint.to_account_info().is_writable, Unauthorized);
+        assert_keys_eq!(
+            self.token_mint.mint_authority.unwrap(),
+            self.mint_wrapper.key(),
+            "token mint authority",
+        );
+
         Ok(())
     }
 }
